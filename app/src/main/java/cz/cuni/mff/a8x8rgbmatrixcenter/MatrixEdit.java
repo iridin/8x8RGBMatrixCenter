@@ -2,6 +2,7 @@ package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ArrayAdapter;
@@ -24,8 +25,11 @@ public class MatrixEdit extends AppCompatActivity {
         // Set the adapter for the list view
         drawerList.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.drawer_list_item, menuItems));
+
         // Set the list's click listener
         drawerList.setOnItemClickListener(new DrawerItemClickListener(this, drawerLayout, drawerList));
+        // Select default fragment
+        drawerList.setItemChecked(0, true);
 
         // Set matrix fragment
         MatrixFragment fragment = new MatrixFragment();
@@ -34,5 +38,15 @@ public class MatrixEdit extends AppCompatActivity {
         fragmentManager.beginTransaction()
                 .replace(R.id.content_frame, fragment)
                 .commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 }

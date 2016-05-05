@@ -26,20 +26,20 @@ public class DrawerItemClickListener implements ListView.OnItemClickListener {
     @Override
     public void onItemClick(AdapterView parent, View view, int position, long id) {
 
+        final String matrixString = mActivity.getString(R.string.matrix_string);
+        final String settingsString = mActivity.getString(R.string.settings_string);
+        final String aboutString = mActivity.getString(R.string.about_string);
+
         Fragment fragment;
         String item  = (String) mDrawerList.getItemAtPosition(position);
-        switch (item) {
-            case "Matrix":
-                fragment = new MatrixFragment();
-                break;
-            case "Settings":
-                fragment = new SettingsFragment();
-                break;
-            case "About":
-                fragment = new AboutFragment();
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format("The \"%s\" item in menu is not supported.", item));
+        if(matrixString.equals(item)) {
+            fragment = new MatrixFragment();
+        } else if(settingsString.equals(item)) {
+            fragment = new SettingsFragment();
+        } else if(aboutString.equals(item)) {
+            fragment = new AboutFragment();
+        } else {
+            throw new UnsupportedOperationException(String.format("The \"%s\" item in menu is not supported.", item));
         }
 
         // Insert the fragment by replacing any existing fragment

@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">8x8RGBMatrixCenter</string>
+    <string name="matrix_string">Matrix</string>
+    <string name="settings_string">Settings</string>
+    <string name="about_string">About</string>
     <string-array name="menu_items">
-        <item>Matrix</item>
-        <item>Settings</item>
-        <item>About</item>
+        <item>@string/matrix_string</item>
+        <item>@string/settings_string</item>
+        <item>@string/about_string</item>
     </string-array>
 </resources>
