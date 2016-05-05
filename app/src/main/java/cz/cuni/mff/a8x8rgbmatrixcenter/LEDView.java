@@ -48,12 +48,18 @@ public class LEDView extends View {
                 Color.argb(COLOR_MAX, red, green, blue), Color.argb(COLOR_MIN, red, green, blue),
                 android.graphics.Shader.TileMode.CLAMP);
 
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setDither(true);
-        paint.setShader(gradient);
+        Paint ledPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        ledPaint.setDither(true);
+        ledPaint.setShader(gradient);
 
-        // Draw the shadow
-        canvas.drawOval(xMin, yMin, xMax, yMax, paint);
+        Paint backgroundPaint = new Paint();
+        backgroundPaint.setColor(ledMatrix.getLedBackground());
+
+        // Draw background
+        canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), backgroundPaint);
+
+        // Draw LED
+        canvas.drawOval(xMin, yMin, xMax, yMax, ledPaint);
     }
 
     public int getRed() {

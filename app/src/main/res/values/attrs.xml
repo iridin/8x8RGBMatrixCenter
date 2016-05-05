@@ -2,5 +2,6 @@
 <resources>
     <declare-styleable name="MatrixView">
         <attr name="ledMargin" format="dimension" />
+        <attr name="ledBackground" format="color" />
     </declare-styleable>
 </resources>

@@ -3,6 +3,7 @@ package cz.cuni.mff.a8x8rgbmatrixcenter;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ public class MatrixView extends ViewGroup {
     public static final int LED_ARRAY_HEIGHT = 8;
 
     private float ledMargin = 0;
+    private int ledBackground = Color.WHITE;
 
     public MatrixView(Context context) {
         super(context);
@@ -37,6 +39,7 @@ public class MatrixView extends ViewGroup {
 
         try {
             ledMargin = a.getDimension(R.styleable.MatrixView_ledMargin, 0);
+            ledBackground = a.getColor(R.styleable.MatrixView_ledBackground, Color.WHITE);
 
         } finally {
             a.recycle();
@@ -84,5 +87,9 @@ public class MatrixView extends ViewGroup {
 
     public float getLedMargin(){
         return ledMargin;
+    }
+
+    public int getLedBackground(){
+        return ledBackground;
     }
 }
