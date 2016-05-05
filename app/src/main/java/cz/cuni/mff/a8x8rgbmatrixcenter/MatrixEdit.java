@@ -1,12 +1,15 @@
 package cz.cuni.mff.a8x8rgbmatrixcenter;
 
+import android.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
-import android.view.View;
-import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_HEIGHT;
-import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
+/**
+ * Created by Dominik Skoda on 19.04.2016.
+ */
 public class MatrixEdit extends AppCompatActivity {
 
     @Override
@@ -14,15 +17,22 @@ public class MatrixEdit extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_matrix_edit);
 
-        MatrixView matrixView = (MatrixView) findViewById(R.id.matrixView);
-        LayoutInflater layoutInflater = getLayoutInflater();
-        View view;
+        // Initialize drawer list
+        String[] menuItems = getResources().getStringArray(R.array.menu_items);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ListView drawerList = (ListView) findViewById(R.id.left_drawer);
+        // Set the adapter for the list view
+        drawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, menuItems));
+        // Set the list's click listener
+        drawerList.setOnItemClickListener(new DrawerItemClickListener(this, drawerLayout, drawerList));
 
-        for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
-            view = layoutInflater.inflate(R.layout.led_layout, matrixView, false);
-            LEDView ledView = (LEDView) view.findViewById(R.id.led_view);
-            ledView.setLedMatrix(matrixView);
-            matrixView.addView(ledView);
-        }
+        // Set matrix fragment
+        MatrixFragment fragment = new MatrixFragment();
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
     }
 }

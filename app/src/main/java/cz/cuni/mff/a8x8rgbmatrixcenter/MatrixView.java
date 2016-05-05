@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 
 /**
- * Created by iridi on 19.04.2016.
+ * Created by Dominik Skoda on 19.04.2016.
  */
 public class MatrixView extends ViewGroup {
 
