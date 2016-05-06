@@ -12,7 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         custom:colorMargin="2dp"
-        custom:defaultColor="#FFFFFF"
         custom:colorCount="8" />
 
     <cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView

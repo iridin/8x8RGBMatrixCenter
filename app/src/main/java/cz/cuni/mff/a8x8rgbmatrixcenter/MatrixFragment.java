@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
+
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_HEIGHT;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_COUNT;
 
 /**
  * Created by Dominik Skoda on 19.04.2016.
@@ -32,6 +34,17 @@ public class MatrixFragment extends Fragment {
             ledView.setLedMatrix(matrixView);
             matrixView.addView(ledView);
         }
+
+        // Initialize Color pelette
+        ColorSelectionView paletteView = (ColorSelectionView) rootView.findViewById(R.id.colorSelectionView);
+        for(int i = 0; i < COLOR_COUNT; i++) {
+            View view = layoutInflater.inflate(R.layout.color_layout, paletteView, false);
+            ColorView colorView = (ColorView) view.findViewById(R.id.color_view);
+            colorView.setParentView(paletteView);
+            paletteView.addView(colorView);
+        }
+
+
         return rootView;
     }
 }

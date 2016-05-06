@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 
@@ -76,13 +75,6 @@ public class MatrixView extends ViewGroup {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        Paint paint = new Paint();
-        //paint.setColor(0x009E9E9E);
-        paint.setARGB(255, 0, 255, 0);
-        paint.setStyle(Paint.Style.FILL);
-
-        canvas.drawRect(0, 0, canvas.getWidth(), canvas.getWidth(), paint);
     }
 
     public float getLedMargin(){

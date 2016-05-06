@@ -7,7 +7,6 @@
 
     <declare-styleable name="ColorSelectionView">
         <attr name="colorMargin" format="dimension" />
-        <attr name="defaultColor" format="color" />
         <attr name="colorCount" format="integer" />
     </declare-styleable>
 </resources>

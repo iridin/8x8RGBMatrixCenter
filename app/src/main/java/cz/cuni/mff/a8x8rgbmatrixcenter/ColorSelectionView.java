@@ -3,19 +3,21 @@ package cz.cuni.mff.a8x8rgbmatrixcenter;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.view.View;
+import android.view.ViewGroup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Dominik Skoda on 19.04.2016.
  */
-public class ColorSelectionView extends View {
+public class ColorSelectionView extends ViewGroup {
+
+    public static final int COLOR_COUNT = 8;
 
     private static final int DEFAULT_COLOR = 0xFF000000;
-    private static final int DEFAULT_COLOR_CNT = 8;
     private static final int[] DEFAULT_COLORS = new int[] {
             0xFF000000,
             0xFFFFFFFF,
@@ -26,20 +28,16 @@ public class ColorSelectionView extends View {
             0xFFFF00FF,
             0xFF00FFFF };
 
-    private int[] colors;
+    List<ColorView> colorViews = new ArrayList<>();
+    private int selectedColor;
+
     private int colorMargin;
-    private int defaultColor;
-    private int colorCount;
 
     public ColorSelectionView(Context context) {
         super(context);
 
         colorMargin = 0;
-        defaultColor = 0xFF000000;
-        colorCount = DEFAULT_COLOR_CNT;
-        colors = new int[colorCount];
-
-        setColors();
+        selectedColor = 0;
     }
 
     public ColorSelectionView(Context context, AttributeSet attrs) {
@@ -50,7 +48,6 @@ public class ColorSelectionView extends View {
         super(context, attrs, defStyle);
 
         processAttributes(context, attrs);
-        setColors();
     }
 
     private void processAttributes(Context context, AttributeSet attrs) {
@@ -61,34 +58,66 @@ public class ColorSelectionView extends View {
             DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
             colorMargin = Math.round(a.getDimension(R.styleable.ColorSelectionView_colorMargin, 0)
                     * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-            defaultColor = a.getColor(R.styleable.ColorSelectionView_defaultColor, Color.WHITE);
-            colorCount = a.getInt(R.styleable.ColorSelectionView_colorCount, DEFAULT_COLOR_CNT);
         } finally {
             a.recycle();
         }
 
-        colors = new int[colorCount];
+        selectedColor = 0;
     }
 
-    private void setColors(){
-        for(int i = 0; i < colorCount; i++){
-            // TODO: load saved palette
-            if(DEFAULT_COLORS.length > i){
-                colors[i] = DEFAULT_COLORS[i];
-            } else {
-                colors[i] = DEFAULT_COLOR;
-            }
+    public void colorViewAdded(ColorView colorView){
+        int i = colorViews.size();
+
+        // Set color
+        // TODO: load saved palette
+        if(DEFAULT_COLORS.length > i){
+            colorView.setColor(DEFAULT_COLORS[i]);
+        } else {
+            colorView.setColor(DEFAULT_COLOR);
+        }
+
+        colorView.setSelected(i == 0);
+        colorViews.add(colorView);
+    }
+
+    public void colorViewClicked(ColorView view){
+        int i = colorViews.indexOf(view);
+
+        if(i >= 0 && i != selectedColor){
+            ColorView previousView = colorViews.get(selectedColor);
+            previousView.setSelected(false);
+            previousView.invalidate();
+
+            selectedColor = i;
+            view.setSelected(true);
+            view.invalidate();
+        }
+    }
+
+    public void colorViewLongClicked(ColorView view){
+
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        assert(getChildCount() == COLOR_COUNT);
+
+        final int colorSize = (getWidth() - (COLOR_COUNT + 1) * colorMargin) / COLOR_COUNT;
+
+        final int top = colorMargin;
+        final int bottom = colorMargin + colorSize;
+        for(int i = 0; i < COLOR_COUNT; i++) {
+            final int left = (i + 1) * colorMargin + i * colorSize;
+            final int right = (i + 1) * colorMargin + (i + 1) * colorSize;
+
+            getChildAt(i).layout(left, top, right, bottom);
         }
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if(colorCount <= 0){
-            setMeasuredDimension(0, 0);
-            return;
-        }
 
-        int colorSize = (widthMeasureSpec - (colorCount + 1) * colorMargin) / colorCount;
+        int colorSize = (widthMeasureSpec - (COLOR_COUNT + 1) * colorMargin) / COLOR_COUNT;
         int height = 2*colorMargin + colorSize;
         setMeasuredDimension(widthMeasureSpec, (int) Math.ceil(height));
     }
@@ -96,26 +125,5 @@ public class ColorSelectionView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        Paint borderPaint = new Paint();
-        borderPaint.setColor(Color.BLACK);
-        borderPaint.setStyle(Paint.Style.STROKE);
-        borderPaint.setStrokeWidth(2);
-
-        final int colorSize = (canvas.getWidth() - (colorCount + 1) * colorMargin) / colorCount;
-
-        final int top = colorMargin;
-        final int bottom = colorMargin + colorSize;
-        for(int i = 0; i < colorCount; i++){
-            final int left = (i+1)*colorMargin + i*colorSize;
-            final int right = (i+1)*colorMargin + (i+1)*colorSize;
-
-            Paint colorPaint = new Paint();
-            colorPaint.setColor(colors[i]);
-            colorPaint.setStyle(Paint.Style.FILL);
-
-            canvas.drawRect(left, top, right, bottom, colorPaint);
-            canvas.drawRect(left, top, right, bottom, borderPaint);
-        }
     }
 }
