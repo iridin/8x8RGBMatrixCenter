@@ -6,6 +6,32 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="ledBackground">@color/colorPrimary</item>
+    </style>
+
+    <style name="CustomThemeDark" parent="AppTheme">
+        <item name="colorPrimary">@color/colorThemeDarkPrimary</item>
+        <item name="colorPrimaryDark">@color/colorThemeDarkPrimaryDark</item>
+        <item name="colorAccent">@color/colorThemeDarkAccent</item>
+
+        <item name="ledBackground">@color/colorThemeDarkPrimary</item>
+    </style>
+
+    <style name="CustomThemeLight" parent="AppTheme">
+        <item name="colorPrimary">@color/colorThemeLightPrimary</item>
+        <item name="colorPrimaryDark">@color/colorThemeLightPrimaryDark</item>
+        <item name="colorAccent">@color/colorThemeLightAccent</item>
+
+        <item name="ledBackground">@color/colorThemeLightPrimary</item>
+    </style>
+
+    <style name="CustomThemeColorful" parent="AppTheme">
+        <item name="colorPrimary">@color/colorThemeColorfulPrimary</item>
+        <item name="colorPrimaryDark">@color/colorThemeColorfulPrimaryDark</item>
+        <item name="colorAccent">@color/colorThemeColorfulAccent</item>
+
+        <item name="ledBackground">@color/colorThemeColorfulPrimary</item>
     </style>
 
 </resources>

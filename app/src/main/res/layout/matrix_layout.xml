@@ -15,6 +15,5 @@
         android:id="@+id/matrixView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        custom:ledBackground="#9E9E9E"
         custom:ledMargin="1dp" />
 </LinearLayout>

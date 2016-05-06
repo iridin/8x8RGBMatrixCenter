@@ -4,15 +4,22 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:openDrawer="start">
+    tools:openDrawer="start"
+    tools:context=".MatrixActivity" >
 
     <!-- The main content view -->
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
+        android:orientation="vertical"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/content_frame"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            tools:context="cz.cuni.mff.a8x8rgbmatrixcenter.MatrixEdit" />
+            android:layout_height="fill_parent" />
+    </LinearLayout>
 
     <!-- The navigation drawer -->
     <ListView

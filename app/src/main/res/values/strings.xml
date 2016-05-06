@@ -8,4 +8,13 @@
         <item>@string/settings_string</item>
         <item>@string/about_string</item>
     </string-array>
+
+    <string name="dark_theme">Dark</string>
+    <string name="light_theme">Light</string>
+    <string name="colorful_theme">Colorful</string>
+    <string-array name="theme_items">
+        <item>@string/dark_theme</item>
+        <item>@string/light_theme</item>
+        <item>@string/colorful_theme</item>
+    </string-array>
 </resources>
