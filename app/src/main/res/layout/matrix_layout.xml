@@ -6,12 +6,17 @@
     android:orientation="vertical"
     tools:context="cz.cuni.mff.a8x8rgbmatrixcenter.MatrixFragment">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView
+        xmlns:custom="http://schemas.android.com/apk/res/cz.cuni.mff.a8x8rgbmatrixcenter"
+        android:id="@+id/colorSelectionView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:colorMargin="2dp"
+        custom:defaultColor="#FFFFFF"
+        custom:colorCount="8" />
 
-    <cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView xmlns:custom="http://schemas.android.com/apk/res/cz.cuni.mff.a8x8rgbmatrixcenter"
+    <cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView
+        xmlns:custom="http://schemas.android.com/apk/res/cz.cuni.mff.a8x8rgbmatrixcenter"
         android:id="@+id/matrixView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
