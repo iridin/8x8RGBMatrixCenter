@@ -30,6 +30,10 @@ public class CustomColorActivity extends AppCompatActivity {
 
         intent = getIntent();
         color = intent.getIntExtra(ColorSelectionView.COLOR_KEY, 0);
+        // If the state is restored from saved instance
+        if(savedInstanceState != null) {
+            color = savedInstanceState.getInt(ColorSelectionView.COLOR_KEY);
+        }
         ledRed = ColorHelper.color2LedRed(color);
         ledGreen = ColorHelper.color2LedGreen(color);
         ledBlue = ColorHelper.color2LedBlue(color);
@@ -43,6 +47,15 @@ public class CustomColorActivity extends AppCompatActivity {
 
         colorView = (ColorView) findViewById(R.id.colorPreview);
         colorView.setColor(color);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save current state
+        savedInstanceState.putInt(ColorSelectionView.COLOR_KEY, color);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     private void registerOkButton(){
