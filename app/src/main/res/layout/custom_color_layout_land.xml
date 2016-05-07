@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/custom_color_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context=".CustomColorActivity">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="1"
+            android:layout_gravity="center">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <cz.cuni.mff.a8x8rgbmatrixcenter.VerticalSeekBar
+                    android:id="@+id/red_seekbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/seekbar_vertical_margin"
+                    android:layout_marginLeft="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginRight="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginTop="@dimen/seekbar_vertical_margin"
+                    android:layout_weight="1"
+                    android:max="3" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/seekbar_vertical_margin"
+                    android:layout_marginLeft="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginRight="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginTop="@dimen/seekbar_vertical_margin"
+                    android:text="Red:"
+                    android:textColor="#FF0000" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <cz.cuni.mff.a8x8rgbmatrixcenter.VerticalSeekBar
+                    android:id="@+id/green_seekbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/seekbar_vertical_margin"
+                    android:layout_marginLeft="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginRight="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginTop="@dimen/seekbar_vertical_margin"
+                    android:layout_weight="1"
+                    android:max="3" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/seekbar_vertical_margin"
+                    android:layout_marginLeft="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginRight="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginTop="@dimen/seekbar_vertical_margin"
+                    android:text="Green:"
+                    android:textColor="#00FF00" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <cz.cuni.mff.a8x8rgbmatrixcenter.VerticalSeekBar
+                    android:id="@+id/blue_seekbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/seekbar_vertical_margin"
+                    android:layout_marginLeft="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginRight="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginTop="@dimen/seekbar_vertical_margin"
+                    android:layout_weight="1"
+                    android:max="3" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/seekbar_vertical_margin"
+                    android:layout_marginLeft="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginRight="@dimen/seekbar_horizontal_margin"
+                    android:layout_marginTop="@dimen/seekbar_vertical_margin"
+                    android:text="Blue:"
+                    android:textColor="#0000FF" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/cancel_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/seekbar_vertical_margin"
+                android:layout_marginLeft="@dimen/seekbar_horizontal_margin"
+                android:layout_marginRight="@dimen/seekbar_horizontal_margin"
+                android:layout_marginTop="@dimen/seekbar_vertical_margin"
+                android:text="Cancel" />
+
+            <Button
+                android:id="@+id/ok_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/seekbar_vertical_margin"
+                android:layout_marginLeft="@dimen/seekbar_horizontal_margin"
+                android:layout_marginRight="@dimen/seekbar_horizontal_margin"
+                android:layout_marginTop="@dimen/seekbar_vertical_margin"
+                android:text="OK" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <cz.cuni.mff.a8x8rgbmatrixcenter.ColorView
+        android:id="@+id/colorPreview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/seekbar_horizontal_margin"
+        android:layout_marginBottom="@dimen/seekbar_vertical_margin"
+        android:layout_marginRight="@dimen/seekbar_horizontal_margin"
+        android:layout_marginTop="@dimen/seekbar_vertical_margin" />
+</LinearLayout>
+
+

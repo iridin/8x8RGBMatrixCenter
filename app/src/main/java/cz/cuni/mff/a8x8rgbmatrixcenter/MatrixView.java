@@ -12,7 +12,7 @@ import android.view.ViewGroup;
  * Created by Dominik Skoda on 19.04.2016.
  */
 public class MatrixView extends ViewGroup  implements View.OnClickListener {
-
+// TODO: save state when rotating
     public static final int LED_ARRAY_WIDTH = 8;
     public static final int LED_ARRAY_HEIGHT = 8;
 

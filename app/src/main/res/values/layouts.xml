@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="custom_color_layout" type="layout">@layout/custom_color_layout_port</item>
+</resources>
