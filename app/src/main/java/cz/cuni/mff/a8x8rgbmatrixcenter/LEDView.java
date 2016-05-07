@@ -63,4 +63,8 @@ public class LEDView extends View {
         this.color = color;
     }
 
+    public int getColor(){
+        return color;
+    }
+
 }

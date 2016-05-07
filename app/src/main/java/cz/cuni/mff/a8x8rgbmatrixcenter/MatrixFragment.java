@@ -15,6 +15,9 @@ import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_COUNT;
  */
 public class MatrixFragment extends Fragment {
 
+    private LEDView[] leds = new LEDView[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
+    private int[] colors;
+
     public MatrixFragment() {
         // Empty constructor required for fragment subclasses
     }
@@ -41,13 +44,31 @@ public class MatrixFragment extends Fragment {
         for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
             View view = inflater.inflate(R.layout.led_layout, matrixView, false);
             LEDView ledView = (LEDView) view.findViewById(R.id.led_view);
+            if(colors != null && colors.length == LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH){
+                ledView.setColor(colors[i]);
+            }
+
             ledView.setLedMatrix(matrixView);
             matrixView.addView(ledView);
             ledView.setOnClickListener(matrixView);
+
+            leds[i] = ledView;
         }
 
 
         return rootView;
+    }
+
+    public void saveMatrixState(Bundle savedInstanceState){
+        int colors[] = new int[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
+        for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
+            colors[i] = leds[i].getColor();
+        }
+        savedInstanceState.putIntArray(MatrixActivity.LED_COLOR_KEY, colors);
+    }
+
+    public void setLedColors(int[] colors){
+        this.colors = colors;
     }
 }
 

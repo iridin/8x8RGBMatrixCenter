@@ -12,8 +12,6 @@ import android.widget.SeekBar;
  */
 public class CustomColorActivity extends AppCompatActivity {
 
-    public static final int SEEKBAR_STEP_COUNT = 4;
-
     private int color = 0;
     private int ledRed = 0;
     private int ledGreen = 0;

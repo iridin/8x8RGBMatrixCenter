@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.AdapterView;
 
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.PREFS_NAME;
-import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.THEME_SETTINGS;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.THEME_SETTINGS_KEY;
 
 /**
  * Created by Dominik Skoda on 06.05.2016.
@@ -35,7 +35,7 @@ public class ThemeSpinnerListener implements AdapterView.OnItemSelectedListener 
         if(MatrixActivity.currentTheme != newTheme) {
             SharedPreferences settings = mActivity.getSharedPreferences(PREFS_NAME, 0);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putInt(THEME_SETTINGS, newTheme);
+            editor.putInt(THEME_SETTINGS_KEY, newTheme);
             // Commit the edits!
             editor.commit();
             mActivity.recreate();

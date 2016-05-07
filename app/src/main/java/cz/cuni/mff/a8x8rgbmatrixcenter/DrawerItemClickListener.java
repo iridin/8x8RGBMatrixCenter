@@ -24,7 +24,7 @@ public class DrawerItemClickListener implements ListView.OnItemClickListener {
     public void onItemClick(AdapterView parent, View view, int position, long id) {
 
         String item  = (String) mDrawerList.getItemAtPosition(position);
-        mActivity.setFragment(item, position);
+        mActivity.setFragment(item, position, null);
 
         // Highlight the selected item, update the title, and close the drawer
         mDrawerList.setItemChecked(position, true);

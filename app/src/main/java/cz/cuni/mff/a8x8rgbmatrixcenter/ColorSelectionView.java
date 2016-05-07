@@ -122,7 +122,7 @@ public class ColorSelectionView extends ViewGroup {
         Intent intent = new Intent(mActivity, CustomColorActivity.class);
         intent.putExtra(COLOR_KEY, view.getColor());
         intent.putExtra(COLOR_VIEW_INDEX_KEY, colorViews.indexOf(view));
-        intent.putExtra(MatrixActivity.INTENT_CALLER, this.getClass().getName());
+        intent.putExtra(MatrixActivity.INTENT_CALLER_KEY, this.getClass().getName());
         mActivity.startActivityForResult(intent, 0);
     }
 
