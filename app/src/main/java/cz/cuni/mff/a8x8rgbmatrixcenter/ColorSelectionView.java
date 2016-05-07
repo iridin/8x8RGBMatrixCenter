@@ -171,4 +171,8 @@ public class ColorSelectionView extends ViewGroup {
     public void setActivity(Activity activity){
         mActivity = activity;
     }
+
+    public int getColor(){
+        return colorViews.get(selectedColor).getColor();
+    }
 }

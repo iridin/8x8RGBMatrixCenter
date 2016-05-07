@@ -13,21 +13,14 @@ import android.view.View;
  */
 public class LEDView extends View {
 
-    public static final int COLOR_MIN = 0;
-    public static final int COLOR_MAX = 255;
-
-    private int red;
-    private int green;
-    private int blue;
+    private int color;
 
     private MatrixView ledMatrix;
 
     public LEDView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        red = COLOR_MAX;
-        green = COLOR_MIN;
-        blue = COLOR_MIN;
+        color = Color.BLACK;
     }
 
     @Override
@@ -45,7 +38,7 @@ public class LEDView extends View {
         float radius = Math.max(xMax, yMax) / 2 - 2 * ledMargin;
 
         RadialGradient gradient = new RadialGradient(xCenter, yCenter, radius,
-                Color.argb(COLOR_MAX, red, green, blue), Color.argb(COLOR_MIN, red, green, blue),
+                color, color & 0x00FFFFFF,
                 android.graphics.Shader.TileMode.CLAMP);
 
         Paint ledPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -62,58 +55,12 @@ public class LEDView extends View {
         canvas.drawOval(xMin, yMin, xMax, yMax, ledPaint);
     }
 
-    public int getRed() {
-        return red;
-    }
-
-    public void setRed(int red) {
-        if(red < COLOR_MIN){
-            this.red = COLOR_MIN;
-            return;
-        }
-        if(red > COLOR_MAX){
-            this.red = COLOR_MAX;
-            return;
-        }
-
-        this.red = red;
-    }
-
-    public int getGreen() {
-        return green;
-    }
-
-    public void setGreen(int green) {
-        if(green < COLOR_MIN){
-            this.green = COLOR_MIN;
-            return;
-        }
-        if(green > COLOR_MAX){
-            this.green = COLOR_MAX;
-            return;
-        }
-
-        this.green = green;
-    }
-
-    public int getBlue() {
-        return blue;
-    }
-
-    public void setBlue(int blue) {
-        if(blue < COLOR_MIN){
-            this.blue = COLOR_MIN;
-            return;
-        }
-        if(blue > COLOR_MAX){
-            this.blue = COLOR_MAX;
-            return;
-        }
-
-        this.blue = blue;
-    }
-
     public void setLedMatrix(MatrixView parentMatrix){
         ledMatrix = parentMatrix;
     }
+
+    public void setColor(int color){
+        this.color = color;
+    }
+
 }

@@ -25,24 +25,25 @@ public class MatrixFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View rootView = inflater.inflate(R.layout.matrix_layout, container, false);
 
-        // Initialize LED matrix
-        MatrixView matrixView = (MatrixView) rootView.findViewById(R.id.matrixView);
-        LayoutInflater layoutInflater = getActivity().getLayoutInflater();
-        for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
-            View view = layoutInflater.inflate(R.layout.led_layout, matrixView, false);
-            LEDView ledView = (LEDView) view.findViewById(R.id.led_view);
-            ledView.setLedMatrix(matrixView);
-            matrixView.addView(ledView);
-        }
-
-        // Initialize Color pelette
+        // Initialize Color palette
         ColorSelectionView paletteView = (ColorSelectionView) rootView.findViewById(R.id.colorSelectionView);
         paletteView.setActivity(getActivity());
         for(int i = 0; i < COLOR_COUNT; i++) {
-            View view = layoutInflater.inflate(R.layout.color_layout, paletteView, false);
+            View view = inflater.inflate(R.layout.color_layout, paletteView, false);
             ColorView colorView = (ColorView) view.findViewById(R.id.color_view);
             colorView.setParentView(paletteView);
             paletteView.addView(colorView);
+        }
+
+        // Initialize LED matrix
+        MatrixView matrixView = (MatrixView) rootView.findViewById(R.id.matrixView);
+        matrixView.setColorSelection(paletteView);
+        for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
+            View view = inflater.inflate(R.layout.led_layout, matrixView, false);
+            LEDView ledView = (LEDView) view.findViewById(R.id.led_view);
+            ledView.setLedMatrix(matrixView);
+            matrixView.addView(ledView);
+            ledView.setOnClickListener(matrixView);
         }
 
 
