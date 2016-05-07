@@ -57,6 +57,9 @@ public class MatrixView extends ViewGroup  implements View.OnClickListener {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         assert(getChildCount() == LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH);
+        if(getChildCount() == 0){
+            return;
+        }
 
         int width = getWidth() / LED_ARRAY_WIDTH;
         int height = getHeight() / LED_ARRAY_HEIGHT;

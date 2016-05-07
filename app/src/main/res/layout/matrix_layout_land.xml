@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context="cz.cuni.mff.a8x8rgbmatrixcenter.MatrixFragment">
+
+    <cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView
+        xmlns:custom="http://schemas.android.com/apk/res/cz.cuni.mff.a8x8rgbmatrixcenter"
+        android:id="@+id/colorSelectionView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        custom:colorMargin="2dp"
+        custom:colorCount="8"
+        custom:orientation="vertical"/>
+
+    <cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView
+        xmlns:custom="http://schemas.android.com/apk/res/cz.cuni.mff.a8x8rgbmatrixcenter"
+        android:id="@+id/matrixView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:ledMargin="1dp" />
+</LinearLayout>

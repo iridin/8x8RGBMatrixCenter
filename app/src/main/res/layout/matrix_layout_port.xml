@@ -10,9 +10,10 @@
         xmlns:custom="http://schemas.android.com/apk/res/cz.cuni.mff.a8x8rgbmatrixcenter"
         android:id="@+id/colorSelectionView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         custom:colorMargin="2dp"
-        custom:colorCount="8" />
+        custom:colorCount="8"
+        custom:orientation="horizontal"/>
 
     <cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView
         xmlns:custom="http://schemas.android.com/apk/res/cz.cuni.mff.a8x8rgbmatrixcenter"

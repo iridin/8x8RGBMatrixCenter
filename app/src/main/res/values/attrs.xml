@@ -8,5 +8,9 @@
     <declare-styleable name="ColorSelectionView">
         <attr name="colorMargin" format="dimension" />
         <attr name="colorCount" format="integer" />
+        <attr name="orientation" format="enum">
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
+        </attr>
     </declare-styleable>
 </resources>

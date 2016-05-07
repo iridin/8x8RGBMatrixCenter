@@ -42,6 +42,7 @@ public class ColorSelectionView extends ViewGroup {
     private int selectedColor;
 
     private int colorMargin;
+    private Orientation orientation;
 
     private Activity mActivity;
 
@@ -50,6 +51,8 @@ public class ColorSelectionView extends ViewGroup {
         super(context);
 
         colorMargin = 0;
+        orientation = Orientation.horizontal;
+
         selectedColor = 0;
         mActivity = null;
     }
@@ -73,6 +76,7 @@ public class ColorSelectionView extends ViewGroup {
             DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
             colorMargin = Math.round(a.getDimension(R.styleable.ColorSelectionView_colorMargin, 0)
                     * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+            orientation = Orientation.parse(a.getInt(R.styleable.ColorSelectionView_orientation, 0));
         } finally {
             a.recycle();
         }
@@ -142,16 +146,37 @@ public class ColorSelectionView extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         assert(getChildCount() == COLOR_COUNT);
+        if(getChildCount() == 0){
+            return;
+        }
 
-        final int colorSize = (getWidth() - (COLOR_COUNT + 1) * colorMargin) / COLOR_COUNT;
+        switch(orientation) {
+            case horizontal: {
+                final int colorSize = (getWidth() - (COLOR_COUNT + 1) * colorMargin) / COLOR_COUNT;
 
-        final int top = colorMargin;
-        final int bottom = colorMargin + colorSize;
-        for(int i = 0; i < COLOR_COUNT; i++) {
-            final int left = (i + 1) * colorMargin + i * colorSize;
-            final int right = (i + 1) * colorMargin + (i + 1) * colorSize;
+                final int top = colorMargin;
+                final int bottom = colorMargin + colorSize;
+                for (int i = 0; i < COLOR_COUNT; i++) {
+                    final int left = (i + 1) * colorMargin + i * colorSize;
+                    final int right = (i + 1) * colorMargin + (i + 1) * colorSize;
 
-            getChildAt(i).layout(left, top, right, bottom);
+                    getChildAt(i).layout(left, top, right, bottom);
+                }
+            }
+                break;
+            case vertical: {
+                final int colorSize = (getHeight() - (COLOR_COUNT + 1) * colorMargin) / COLOR_COUNT;
+
+                final int left = colorMargin;
+                final int right = colorMargin + colorSize;
+                for (int i = 0; i < COLOR_COUNT; i++) {
+                    final int top = (i + 1) * colorMargin + i * colorSize;
+                    final int bottom = (i + 1) * colorMargin + (i + 1) * colorSize;
+
+                    getChildAt(i).layout(left, top, right, bottom);
+                }
+                break;
+            }
         }
     }
 
@@ -160,11 +185,22 @@ public class ColorSelectionView extends ViewGroup {
 
         int colorSize = (widthMeasureSpec - (COLOR_COUNT + 1) * colorMargin) / COLOR_COUNT;
         int height = 2*colorMargin + colorSize;
-        setMeasuredDimension(widthMeasureSpec, (int) Math.ceil(height));
+        switch(orientation) {
+            case horizontal:
+                setMeasuredDimension(widthMeasureSpec, (int) Math.ceil(height));
+                break;
+            case vertical:
+                setMeasuredDimension((int) Math.ceil(height), heightMeasureSpec);
+                break;
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if(orientation == Orientation.vertical){
+            canvas.rotate(-90);
+            canvas.translate(-getHeight(), 0);
+        }
         super.onDraw(canvas);
     }
 
