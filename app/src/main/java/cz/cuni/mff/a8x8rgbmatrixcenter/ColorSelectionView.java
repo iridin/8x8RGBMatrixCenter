@@ -3,6 +3,7 @@ package cz.cuni.mff.a8x8rgbmatrixcenter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
@@ -11,6 +12,8 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.PREFS_NAME;
 
 /**
  * Created by Dominik Skoda on 19.04.2016.
@@ -32,6 +35,7 @@ public class ColorSelectionView extends ViewGroup {
 
     public static final String COLOR_VIEW_INDEX_KEY = "COLOR_VIEW";
     public static final String COLOR_KEY = "color";
+    public static final String COLOR_I_KEY = "Color%d";
 
 
     List<ColorView> colorViews = new ArrayList<>();
@@ -79,14 +83,15 @@ public class ColorSelectionView extends ViewGroup {
     public void colorViewAdded(ColorView colorView){
         int i = colorViews.size();
 
-        // Set color
-        // TODO: load saved palette
-        if(DEFAULT_COLORS.length > i){
-            colorView.setColor(DEFAULT_COLORS[i]);
-        } else {
-            colorView.setColor(DEFAULT_COLOR);
+        int color = DEFAULT_COLORS.length > i
+                ? DEFAULT_COLORS[i]
+                : DEFAULT_COLOR;
+        if(mActivity != null) {
+            SharedPreferences settings = mActivity.getSharedPreferences(PREFS_NAME, 0);
+            color = settings.getInt(String.format(COLOR_I_KEY, i), color);
         }
 
+        colorView.setColor(color);
         colorView.setSelected(i == 0);
         colorViews.add(colorView);
     }
@@ -121,6 +126,12 @@ public class ColorSelectionView extends ViewGroup {
         int index = data.getIntExtra(COLOR_VIEW_INDEX_KEY, -1);
         int color = data.getIntExtra(COLOR_KEY, 0);
         if(index >= 0){
+            SharedPreferences settings = mActivity.getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putInt(String.format(COLOR_I_KEY, index), color);
+            // Commit the edits!
+            editor.commit();
+
             ColorView view = colorViews.get(index);
             view.setColor(color);
             view.invalidate();
