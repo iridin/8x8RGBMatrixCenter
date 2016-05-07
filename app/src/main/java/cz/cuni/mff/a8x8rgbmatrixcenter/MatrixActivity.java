@@ -1,6 +1,7 @@
 package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
@@ -13,6 +14,8 @@ import android.widget.ListView;
  * Created by Dominik Skoda on 19.04.2016.
  */
 public class MatrixActivity extends AppCompatActivity {
+
+    public static final String INTENT_CALLER = "CALLER";
 
     public static final String PREFS_NAME = "RGBMatrixCenterPrefs";
     public static final String THEME_SETTINGS = "THEME_ID";
@@ -54,6 +57,20 @@ public class MatrixActivity extends AppCompatActivity {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode == RESULT_OK){
+            String caller = data.getStringExtra(INTENT_CALLER);
+            if(ColorSelectionView.class.getName().equals(caller)){
+                ColorSelectionView view = (ColorSelectionView) findViewById(R.id.colorSelectionView);
+                view.onActivityResult(data);
+            } else {
+                throw new UnsupportedOperationException(String.format("The \"%s\" intent caller not supported.", caller));
+            }
+
         }
     }
 

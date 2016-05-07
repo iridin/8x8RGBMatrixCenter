@@ -37,6 +37,7 @@ public class MatrixFragment extends Fragment {
 
         // Initialize Color pelette
         ColorSelectionView paletteView = (ColorSelectionView) rootView.findViewById(R.id.colorSelectionView);
+        paletteView.setActivity(getActivity());
         for(int i = 0; i < COLOR_COUNT; i++) {
             View view = layoutInflater.inflate(R.layout.color_layout, paletteView, false);
             ColorView colorView = (ColorView) view.findViewById(R.id.color_view);

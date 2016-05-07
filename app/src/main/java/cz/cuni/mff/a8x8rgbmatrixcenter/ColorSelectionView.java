@@ -1,6 +1,8 @@
 package cz.cuni.mff.a8x8rgbmatrixcenter;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
@@ -28,16 +30,24 @@ public class ColorSelectionView extends ViewGroup {
             0xFFFF00FF,
             0xFF00FFFF };
 
+    public static final String COLOR_VIEW_INDEX_KEY = "COLOR_VIEW";
+    public static final String COLOR_KEY = "color";
+
+
     List<ColorView> colorViews = new ArrayList<>();
     private int selectedColor;
 
     private int colorMargin;
+
+    private Activity mActivity;
+
 
     public ColorSelectionView(Context context) {
         super(context);
 
         colorMargin = 0;
         selectedColor = 0;
+        mActivity = null;
     }
 
     public ColorSelectionView(Context context, AttributeSet attrs) {
@@ -48,6 +58,7 @@ public class ColorSelectionView extends ViewGroup {
         super(context, attrs, defStyle);
 
         processAttributes(context, attrs);
+        mActivity = null;
     }
 
     private void processAttributes(Context context, AttributeSet attrs) {
@@ -95,6 +106,25 @@ public class ColorSelectionView extends ViewGroup {
     }
 
     public void colorViewLongClicked(ColorView view){
+        if(mActivity == null){
+            return;
+        }
+
+        Intent intent = new Intent(mActivity, CustomColorActivity.class);
+        intent.putExtra(COLOR_KEY, view.getColor());
+        intent.putExtra(COLOR_VIEW_INDEX_KEY, colorViews.indexOf(view));
+        intent.putExtra(MatrixActivity.INTENT_CALLER, this.getClass().getName());
+        mActivity.startActivityForResult(intent, 0);
+    }
+
+    public void onActivityResult(Intent data){
+        int index = data.getIntExtra(COLOR_VIEW_INDEX_KEY, -1);
+        int color = data.getIntExtra(COLOR_KEY, 0);
+        if(index >= 0){
+            ColorView view = colorViews.get(index);
+            view.setColor(color);
+            view.invalidate();
+        }
 
     }
 
@@ -125,5 +155,9 @@ public class ColorSelectionView extends ViewGroup {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+    }
+
+    public void setActivity(Activity activity){
+        mActivity = activity;
     }
 }
