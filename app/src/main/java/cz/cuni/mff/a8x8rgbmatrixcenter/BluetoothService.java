@@ -57,6 +57,7 @@ public class BluetoothService extends IntentService {
                 try {
                     socket.connect();
                 } catch (IOException e) { // TODO: FIXME: nasty fallback  :-(
+                    // HACK by http://stackoverflow.com/questions/18657427/ioexception-read-failed-socket-might-closed-bluetooth-on-android-4-3
                     Log.e("BluetoothActivity", e.getMessage());
                     try {
                         Log.e("BluetoothActivity", "trying fallback...");
