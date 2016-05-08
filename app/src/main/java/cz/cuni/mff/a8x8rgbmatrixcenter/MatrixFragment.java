@@ -1,22 +1,30 @@
 package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.Fragment;
+import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
+import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_COUNT;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.BT_DEVICE_MAC_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.BT_DATA_KEY;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_HEIGHT;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
-import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_COUNT;
 
 /**
  * Created by Dominik Skoda on 19.04.2016.
  */
-public class MatrixFragment extends Fragment {
+public class MatrixFragment extends Fragment implements Button.OnClickListener {
 
+    private MatrixActivity mActivity;
+    Button sendButton;
     private LEDView[] leds = new LEDView[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
-    private int[] colors;
+    private int[] initialColors;
 
     public MatrixFragment() {
         // Empty constructor required for fragment subclasses
@@ -44,8 +52,8 @@ public class MatrixFragment extends Fragment {
         for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
             View view = inflater.inflate(R.layout.led_layout, matrixView, false);
             LEDView ledView = (LEDView) view.findViewById(R.id.led_view);
-            if(colors != null && colors.length == LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH){
-                ledView.setColor(colors[i]);
+            if(initialColors != null && initialColors.length == LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH){
+                ledView.setColor(initialColors[i]);
             }
 
             ledView.setLedMatrix(matrixView);
@@ -55,6 +63,16 @@ public class MatrixFragment extends Fragment {
             leds[i] = ledView;
         }
 
+        // Register buttons
+        Button clearButton = (Button) rootView.findViewById(R.id.clear_button);
+        clearButton.setOnClickListener(this);
+        sendButton = (Button) rootView.findViewById(R.id.send_button);
+        sendButton.setOnClickListener(this);
+        if(mActivity == null || mActivity.getConnectedDevice() == null){
+            sendButton.setEnabled(false);
+        } else {
+            sendButton.setEnabled(true);
+        }
 
         return rootView;
     }
@@ -68,7 +86,48 @@ public class MatrixFragment extends Fragment {
     }
 
     public void setLedColors(int[] colors){
-        this.colors = colors;
+        this.initialColors = colors;
     }
+
+    public void setActivity(MatrixActivity activity){
+        mActivity = activity;
+    }
+
+    public void setBTConnected(boolean connected){
+        if(sendButton != null){
+            sendButton.setEnabled(connected);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()){
+            case R.id.send_button:
+                BluetoothDevice btDevice = mActivity.getConnectedDevice();
+                if(btDevice != null) {
+                    int colors[] = new int[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
+                    for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++){
+                        colors[i] = leds[i].getColor();
+                    }
+
+                    Intent intent = new Intent(mActivity, BluetoothService.class);
+                    intent.putExtra(BT_DEVICE_MAC_KEY, btDevice.getAddress());
+                    intent.putExtra(BT_DATA_KEY, colors);
+                    mActivity.startService(intent);
+                }
+                break;
+            case R.id.clear_button:
+                for(LEDView view : leds){
+                    view.setColor(Color.BLACK);
+                    view.invalidate();
+                }
+                break;
+            default:
+                throw new IllegalStateException(String.format(
+                        "The %d view (ID) not supported by the MatrixFragment.Button.OnClickListener",
+                        v.getId()));
+        }
+    }
+
 }
 

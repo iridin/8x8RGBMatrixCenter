@@ -16,8 +16,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".CustomColorActivity">
-        </activity>
+        <activity android:name=".CustomColorActivity" />
+        <service android:name=".BluetoothService" />
     </application>
 
     <uses-permission android:name="android.permission.BLUETOOTH" />

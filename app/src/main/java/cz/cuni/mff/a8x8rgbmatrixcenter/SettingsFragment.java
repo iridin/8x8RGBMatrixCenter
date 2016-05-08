@@ -23,6 +23,8 @@ import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.REQUEST_ENABLE_BT;
  */
 public class SettingsFragment extends Fragment {
 
+    final String[] supportedDevices = new String[]{ "HC-05" };
+
     MatrixActivity mActivity;
     Spinner btSpinner;
 
@@ -94,28 +96,49 @@ public class SettingsFragment extends Fragment {
         btSpinner.invalidate();
     }
 
+    private boolean isBTDeviceSupported(BluetoothDevice device){
+        boolean supported = false;
+        for(String devName : supportedDevices){
+            if(devName.equals(device.getName())){
+                supported = true;
+            }
+        }
+        return supported;
+    }
+
     public void fillBTDevices(){
         if(btSpinner == null){
             return;
         }
+
         BluetoothAdapter btAdapter = mActivity.getBTAdapter();
         // Create BT options
         List<String> deviceNames = new ArrayList<>();
+        List<BluetoothDevice> devices = new ArrayList<>();
         deviceNames.add("No Device");
+        devices.add(null); // Corresponds to "No Device"
         Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
-        // If there are paired devices
-        if (pairedDevices.size() > 0) {
-            // Loop through paired devices
-            for (BluetoothDevice device : pairedDevices) {
+        // Loop through paired devices
+        for (BluetoothDevice device : pairedDevices) {
+            if(isBTDeviceSupported(device)) {
                 // Add the name and address to an array adapter to show in a ListView
-                deviceNames.add(device.getName() + "\t" + device.getAddress());
+                devices.add(device);
+                deviceNames.add(device.getName() + "\n\t" + device.getAddress());
             }
         }
+
 
         ArrayAdapter btArrayAdapter = new ArrayAdapter<String>(mActivity,
                 android.R.layout.simple_spinner_item, deviceNames);
         btArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         btSpinner.setAdapter(btArrayAdapter);
+
+        int spinnerPosition = devices.indexOf(mActivity.getConnectedDevice());
+        btSpinner.setSelection(spinnerPosition);
+
+        BTSpinnerListener btSpinnerListener = new BTSpinnerListener(mActivity, devices);
+        btSpinner.setOnItemSelectedListener(btSpinnerListener);
+
         btSpinner.setEnabled(true);
         btSpinner.invalidate();
     }

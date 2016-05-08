@@ -2,6 +2,7 @@ package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,12 +15,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.Set;
+
 /**
  * Created by Dominik Skoda on 19.04.2016.
  */
 public class MatrixActivity extends AppCompatActivity {
 
-    public static final String DRAWER_POSITION = "DRAWER_POSITION";
+    public static final String BT_DEVICE_MAC_KEY = "BT_DEVICE_MAC";
+    public static final String BT_DATA_KEY = "BT_DATA";
+    public static final String DRAWER_POSITION_KEY = "DRAWER_POSITION";
     public static final String LED_COLOR_KEY = "LED_COLOR";
 
     public static final int REQUEST_COLOR_SELECT = 1;
@@ -33,6 +38,7 @@ public class MatrixActivity extends AppCompatActivity {
     private Fragment fragment;
 
     private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothDevice connectedDevice;
     private final BroadcastReceiver mBTBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -45,12 +51,18 @@ public class MatrixActivity extends AppCompatActivity {
                         if(fragment instanceof SettingsFragment){
                             SettingsFragment sf = (SettingsFragment) fragment;
                             sf.disableBTSpinner();
-                         }
+                         } else if(fragment instanceof MatrixFragment){
+                            MatrixFragment mf = (MatrixFragment) fragment;
+                            mf.setBTConnected(false);
+                        }
                         break;
                     case BluetoothAdapter.STATE_ON:
                         if(fragment instanceof SettingsFragment){
                             SettingsFragment sf = (SettingsFragment) fragment;
                             sf.fillBTDevices();
+                        } else if(fragment instanceof MatrixFragment){
+                            MatrixFragment mf = (MatrixFragment) fragment;
+                            mf.setBTConnected(true);
                         }
                         break;
                 }
@@ -79,16 +91,32 @@ public class MatrixActivity extends AppCompatActivity {
         drawerList.setOnItemClickListener(new DrawerItemClickListener(this, drawerLayout, drawerList));
         // Select current fragment
         drawerPosition = 0;
-        // If the state is restored from saved instance
-        if(savedInstanceState != null) {
-            drawerPosition = savedInstanceState.getInt(DRAWER_POSITION);
-        }
-
-        setFragment((String) drawerList.getItemAtPosition(drawerPosition), drawerPosition, savedInstanceState);
-        drawerList.setItemChecked(drawerPosition, true);
 
         // Initialize bluetooth
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        // If the state is restored from saved instance
+        if(savedInstanceState != null) {
+            // Retrieve drawer position
+            drawerPosition = savedInstanceState.getInt(DRAWER_POSITION_KEY);
+
+            // Retrieve connected deviec
+            String connectedDeviceMAC = savedInstanceState.getString(BT_DEVICE_MAC_KEY, null);
+            if(connectedDeviceMAC != null
+                    && mBluetoothAdapter != null
+                    && mBluetoothAdapter.isEnabled()){
+                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+                for(BluetoothDevice device : pairedDevices){
+                    if(device.getAddress().equals(connectedDeviceMAC)){
+                        connectedDevice = device;
+                    }
+                }
+            }
+        }
+
+        // Set current fragment
+        setFragment((String) drawerList.getItemAtPosition(drawerPosition), drawerPosition, savedInstanceState);
+        drawerList.setItemChecked(drawerPosition, true);
 
         // Register BT state change broadcast receiver
         IntentFilter btFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -110,10 +138,13 @@ public class MatrixActivity extends AppCompatActivity {
         ListView drawerList = (ListView) findViewById(R.id.left_drawer);
 
         // Save current state
-        savedInstanceState.putInt(DRAWER_POSITION, drawerPosition);
+        savedInstanceState.putInt(DRAWER_POSITION_KEY, drawerPosition);
         if(matrixFragment.equals(drawerList.getItemAtPosition(drawerPosition))) {
             MatrixFragment mf = (MatrixFragment) fragment;
             mf.saveMatrixState(savedInstanceState);
+        }
+        if(connectedDevice != null) {
+            savedInstanceState.putString(BT_DEVICE_MAC_KEY, connectedDevice.getAddress());
         }
 
         // Always call the superclass so it can save the view hierarchy state
@@ -159,7 +190,7 @@ public class MatrixActivity extends AppCompatActivity {
                 int[] ledColors = savedInstanceState.getIntArray(LED_COLOR_KEY);
                 mf.setLedColors(ledColors);
             }
-
+            mf.setActivity(this);
             fragment = mf;
         } else if(settingsFragment.equals(fragmentName)) {
             SettingsFragment sf = new SettingsFragment();
@@ -180,5 +211,13 @@ public class MatrixActivity extends AppCompatActivity {
 
     public BluetoothAdapter getBTAdapter(){
         return mBluetoothAdapter;
+    }
+
+    public void setConnectedDevice(BluetoothDevice device){
+        connectedDevice = device;
+    }
+
+    public BluetoothDevice getConnectedDevice(){
+        return connectedDevice;
     }
 }
