@@ -1,11 +1,14 @@
 package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.PREFS_NAME;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.THEME_SETTINGS_KEY;
 
 /**
  * Created by Dominik Skoda on 19.04.2016.
@@ -23,6 +26,11 @@ public class CustomColorActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        int currentTheme = settings.getInt(THEME_SETTINGS_KEY, R.style.AppTheme);
+        setTheme(currentTheme);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.custom_color_layout);
 

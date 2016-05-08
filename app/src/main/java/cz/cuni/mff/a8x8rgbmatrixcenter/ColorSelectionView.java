@@ -183,24 +183,22 @@ public class ColorSelectionView extends ViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-        int colorSize = (widthMeasureSpec - (COLOR_COUNT + 1) * colorMargin) / COLOR_COUNT;
-        int height = 2*colorMargin + colorSize;
         switch(orientation) {
             case horizontal:
-                setMeasuredDimension(widthMeasureSpec, (int) Math.ceil(height));
+                int colorWidth = (widthMeasureSpec - (COLOR_COUNT + 1) * colorMargin) / COLOR_COUNT;
+                int height = 2*colorMargin + colorWidth;
+                setMeasuredDimension(widthMeasureSpec, height);
                 break;
             case vertical:
-                setMeasuredDimension((int) Math.ceil(height), heightMeasureSpec);
+                int colorHeight = (heightMeasureSpec - (COLOR_COUNT + 1) * colorMargin) / COLOR_COUNT;
+                int width = 2*colorMargin + colorHeight;
+                setMeasuredDimension(width, heightMeasureSpec);
                 break;
         }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if(orientation == Orientation.vertical){
-            canvas.rotate(-90);
-            canvas.translate(-getHeight(), 0);
-        }
         super.onDraw(canvas);
     }
 

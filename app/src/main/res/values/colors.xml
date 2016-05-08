@@ -8,9 +8,9 @@
     <color name="colorThemeLightPrimaryDark">#9E9E9E</color>
     <color name="colorThemeLightAccent">#03A9F4</color>
 
-    <color name="colorThemeColorfulPrimary">#CE93D8</color>
-    <color name="colorThemeColorfulPrimaryDark">#9C27B0</color>
-    <color name="colorThemeColorfulAccent">#76FF03</color>
+    <color name="colorThemeColorfulPrimary">#DCE775</color>
+    <color name="colorThemeColorfulPrimaryDark">#CDDC39</color>
+    <color name="colorThemeColorfulAccent">#E040FB</color>
 
     <color name="colorPrimary">@color/colorThemeDarkPrimary</color>
     <color name="colorPrimaryDark">@color/colorThemeDarkPrimaryDark</color>
