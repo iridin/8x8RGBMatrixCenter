@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.PREFS_NAME;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.REQUEST_COLOR_SELECT;
 
 /**
  * Created by Dominik Skoda on 19.04.2016.
@@ -122,8 +123,7 @@ public class ColorSelectionView extends ViewGroup {
         Intent intent = new Intent(mActivity, CustomColorActivity.class);
         intent.putExtra(COLOR_KEY, view.getColor());
         intent.putExtra(COLOR_VIEW_INDEX_KEY, colorViews.indexOf(view));
-        intent.putExtra(MatrixActivity.INTENT_CALLER_KEY, this.getClass().getName());
-        mActivity.startActivityForResult(intent, 0);
+        mActivity.startActivityForResult(intent, REQUEST_COLOR_SELECT);
     }
 
     public void onActivityResult(Intent data){

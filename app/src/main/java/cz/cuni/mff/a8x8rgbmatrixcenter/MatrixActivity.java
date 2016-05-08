@@ -1,7 +1,11 @@
 package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.Fragment;
+import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
@@ -15,10 +19,11 @@ import android.widget.ListView;
  */
 public class MatrixActivity extends AppCompatActivity {
 
-    public static final String INTENT_CALLER_KEY = "CALLER";
-
     public static final String DRAWER_POSITION = "DRAWER_POSITION";
     public static final String LED_COLOR_KEY = "LED_COLOR";
+
+    public static final int REQUEST_COLOR_SELECT = 1;
+    public static final int REQUEST_ENABLE_BT = 2;
 
     public static final String PREFS_NAME = "RGBMatrixCenterPrefs";
     public static final String THEME_SETTINGS_KEY = "THEME_ID";
@@ -26,6 +31,32 @@ public class MatrixActivity extends AppCompatActivity {
 
     private int drawerPosition = 0;
     private Fragment fragment;
+
+    private BluetoothAdapter mBluetoothAdapter;
+    private final BroadcastReceiver mBTBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+                switch(state) {
+                    case BluetoothAdapter.STATE_OFF:
+                        if(fragment instanceof SettingsFragment){
+                            SettingsFragment sf = (SettingsFragment) fragment;
+                            sf.disableBTSpinner();
+                         }
+                        break;
+                    case BluetoothAdapter.STATE_ON:
+                        if(fragment instanceof SettingsFragment){
+                            SettingsFragment sf = (SettingsFragment) fragment;
+                            sf.fillBTDevices();
+                        }
+                        break;
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +86,21 @@ public class MatrixActivity extends AppCompatActivity {
 
         setFragment((String) drawerList.getItemAtPosition(drawerPosition), drawerPosition, savedInstanceState);
         drawerList.setItemChecked(drawerPosition, true);
+
+        // Initialize bluetooth
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        // Register BT state change broadcast receiver
+        IntentFilter btFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(mBTBroadcastReceiver, btFilter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Unregister BT state change broadcast receiver
+        unregisterReceiver(mBTBroadcastReceiver);
     }
 
     @Override
@@ -87,14 +133,18 @@ public class MatrixActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         if(resultCode == RESULT_OK){
-            String caller = data.getStringExtra(INTENT_CALLER_KEY);
-            if(ColorSelectionView.class.getName().equals(caller)){
-                ColorSelectionView view = (ColorSelectionView) findViewById(R.id.colorSelectionView);
-                view.onActivityResult(data);
-            } else {
-                throw new UnsupportedOperationException(String.format("The \"%s\" intent caller not supported.", caller));
+            switch(requestCode) {
+                case REQUEST_COLOR_SELECT:
+                    ColorSelectionView view = (ColorSelectionView) findViewById(R.id.colorSelectionView);
+                    view.onActivityResult(data);
+                    break;
+                case REQUEST_ENABLE_BT:
+                    SettingsFragment sf = (SettingsFragment) fragment;
+                    sf.fillBTDevices();
+                    break;
+                default:
+                    throw new UnsupportedOperationException(String.format("The \"%d\" requestCode not supported.", requestCode));
             }
-
         }
     }
 
@@ -112,7 +162,9 @@ public class MatrixActivity extends AppCompatActivity {
 
             fragment = mf;
         } else if(settingsFragment.equals(fragmentName)) {
-            fragment = new SettingsFragment();
+            SettingsFragment sf = new SettingsFragment();
+            sf.setActivity(this);
+            fragment = sf;
         } else if(aboutFragment.equals(fragmentName)) {
             fragment = new AboutFragment();
         } else {
@@ -124,5 +176,9 @@ public class MatrixActivity extends AppCompatActivity {
                 .replace(R.id.content_frame, fragment)
                 .commit();
         drawerPosition = position;
+    }
+
+    public BluetoothAdapter getBTAdapter(){
+        return mBluetoothAdapter;
     }
 }
