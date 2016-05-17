@@ -24,10 +24,14 @@
         <item>"No Device"</item>
     </string-array>
 
+    <string name="ms100_string">100 ms</string>
+    <string name="ms250_string">250 ms</string>
+    <string name="ms500_string">500 ms</string>
+    <string name="ms1000_string">1000 ms</string>
     <string-array name="time_items">
-        <item>"100 ms"</item>
-        <item>"250 ms"</item>
-        <item>"500 ms"</item>
-        <item>"1000 ms"</item>
+        <item>@string/ms100_string</item>
+        <item>@string/ms250_string</item>
+        <item>@string/ms500_string</item>
+        <item>@string/ms1000_string</item>
     </string-array>
 </resources>

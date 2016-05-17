@@ -4,18 +4,20 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.REQUEST_NEW_COLOR;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_KEY;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_VIEW_INDEX_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.REQUEST_NEW_COLOR;
 
 
 /**
@@ -27,44 +29,72 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public static final int IMAGE_VIEW_TYPE = 1;
 
     private List<Integer> colorChain;
+    private long defaultDelay = 100;
     private Activity mActivity;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ColorViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
+    public static class ColorViewHolder extends RecyclerView.ViewHolder implements AdapterView.OnItemSelectedListener {
+
+        private ColorChainAdapter parent;
+
         public ColorView colorView;
-        public ColorViewHolder(View colorView) {
+        public long delay;
+
+        public ColorViewHolder(View colorView, ColorChainAdapter parent) {
             super(colorView);
             this.colorView = (ColorView) colorView.findViewById(R.id.color_view);
+            this.parent = parent;
+            delay = parent.defaultDelay;
+        }
+
+        @Override
+        public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
+            final String selection = (String) adapter.getItemAtPosition(position);
+            delay = parent.timeSelectionToMillis(selection);
+            Log.i("ColorViewHolder", "Delay: " + delay);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+            // Do nothing
         }
     }
 
-    public static class ImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AdapterView.OnItemSelectedListener {
 
-        private Activity mActivity;
+        private ColorChainAdapter parent;
 
-        public ImageViewHolder(View imageView){
+        public ImageViewHolder(View imageView, ColorChainAdapter parent){
             super(imageView);
             imageView.setOnClickListener(this);
-        }
-
-        public void setActivity(Activity activity){
-            mActivity = activity;
+            this.parent = parent;
         }
 
         @Override
         public void onClick(View v) {
-            if(mActivity == null){
+            if(parent.mActivity == null){
                 return;
             }
 
-            Intent intent = new Intent(mActivity, CustomColorActivity.class);
+            Intent intent = new Intent(parent.mActivity, CustomColorActivity.class);
             intent.putExtra(COLOR_KEY, Color.BLACK);
             intent.putExtra(COLOR_VIEW_INDEX_KEY, 0);
-            mActivity.startActivityForResult(intent, REQUEST_NEW_COLOR);
+            parent.mActivity.startActivityForResult(intent, REQUEST_NEW_COLOR);
         }
+
+        @Override
+        public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
+            final String selection = (String) adapter.getItemAtPosition(position);
+            parent.defaultDelay = parent.timeSelectionToMillis(selection);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+            // Do nothing
+        }
+
     }
 
     // Provide a suitable constructor
@@ -83,14 +113,12 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             case COLOR_VIEW_TYPE:
                 v = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.color_time_layout, parent, false);
-                vh = new ColorViewHolder(v);
+                vh = new ColorViewHolder(v, this);
                 break;
             case IMAGE_VIEW_TYPE:
                 v = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.image_time_layout, parent, false);
-                ImageViewHolder ivh = new ImageViewHolder(v);
-                ivh.setActivity(mActivity);
-                vh = ivh;
+                vh = new ImageViewHolder(v, this);
                 break;
             default:
                 throw new IllegalStateException(String.format(
@@ -106,9 +134,18 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         timeSpinner.setAdapter(timeAdapter);
+        // Set spinner position
+        int spinnerPosition = timeAdapter.getPosition(delayToTimeSelection(defaultDelay));
+        timeSpinner.setSelection(spinnerPosition);
 
-        /*ThemeSpinnerListener themeSpinnerListener = new ThemeSpinnerListener(parent.getContext());
-        timeSpinner.setOnItemSelectedListener(timeSpinnerListener);*/
+        switch(viewType) {
+            case COLOR_VIEW_TYPE:
+                timeSpinner.setOnItemSelectedListener((ColorViewHolder) vh);
+                break;
+            case IMAGE_VIEW_TYPE:
+                timeSpinner.setOnItemSelectedListener((ImageViewHolder) vh);
+                break;
+        }
 
         return vh;
     }
@@ -151,6 +188,41 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public void setActivity(Activity activity){
         mActivity = activity;
+    }
+
+    public long timeSelectionToMillis(String selection){
+        final String ms100 = mActivity.getString(R.string.ms100_string);
+        final String ms250 = mActivity.getString(R.string.ms250_string);
+        final String ms500 = mActivity.getString(R.string.ms500_string);
+        final String ms1000 = mActivity.getString(R.string.ms1000_string);
+
+        long result = 0;
+        if(ms100.equals(selection)){
+            result = 100;
+        } else if(ms250.equals(selection)){
+            result = 250;
+        } else if(ms500.equals(selection)){
+            result = 500;
+        } else if(ms1000.equals(selection)){
+            result = 1000;
+        }
+
+        return result;
+    }
+
+    public String delayToTimeSelection(long delay){
+        String result = mActivity.getString(R.string.ms100_string);
+        if(delay == 100){
+            result = mActivity.getString(R.string.ms100_string);
+        } else if(delay == 250){
+            result = mActivity.getString(R.string.ms250_string);
+        } else if(delay == 500){
+            result = mActivity.getString(R.string.ms500_string);
+        } else if(delay == 1000){
+            result = mActivity.getString(R.string.ms1000_string);
+        }
+
+        return result;
     }
 
 }
