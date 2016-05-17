@@ -17,6 +17,8 @@ import android.widget.ListView;
 
 import java.util.Set;
 
+import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_KEY;
+
 /**
  * Created by Dominik Skoda on 19.04.2016.
  */
@@ -28,7 +30,8 @@ public class MatrixActivity extends AppCompatActivity {
     public static final String LED_COLOR_KEY = "LED_COLOR";
 
     public static final int REQUEST_COLOR_SELECT = 1;
-    public static final int REQUEST_ENABLE_BT = 2;
+    public static final int REQUEST_NEW_COLOR = 2;
+    public static final int REQUEST_ENABLE_BT = 3;
 
     public static final String PREFS_NAME = "RGBMatrixCenterPrefs";
     public static final String THEME_SETTINGS_KEY = "THEME_ID";
@@ -169,10 +172,16 @@ public class MatrixActivity extends AppCompatActivity {
                     ColorSelectionView view = (ColorSelectionView) findViewById(R.id.colorSelectionView);
                     view.onActivityResult(data);
                     break;
-                case REQUEST_ENABLE_BT:
+                case REQUEST_NEW_COLOR: {
+                    SwipeFragment sf = (SwipeFragment) fragment;
+                    sf.addColor(data.getIntExtra(COLOR_KEY, 0));
+                    break;
+                }
+                case REQUEST_ENABLE_BT: {
                     SettingsFragment sf = (SettingsFragment) fragment;
                     sf.fillBTDevices();
                     break;
+                }
                 default:
                     throw new UnsupportedOperationException(String.format("The \"%d\" requestCode not supported.", requestCode));
             }
@@ -181,17 +190,22 @@ public class MatrixActivity extends AppCompatActivity {
 
     public void setFragment(String fragmentName, int position, Bundle savedInstanceState){
         final String matrixFragment = getString(R.string.matrix_string);
+        final String swipeFragment = getString(R.string.swipe_string);
         final String settingsFragment = getString(R.string.settings_string);
         final String aboutFragment = getString(R.string.about_string);
 
         if(matrixFragment.equals(fragmentName)) {
             MatrixFragment mf = new MatrixFragment();
-            if(savedInstanceState != null) {
+            if (savedInstanceState != null) {
                 int[] ledColors = savedInstanceState.getIntArray(LED_COLOR_KEY);
                 mf.setLedColors(ledColors);
             }
             mf.setActivity(this);
             fragment = mf;
+        } else if(swipeFragment.equals(fragmentName)){
+            SwipeFragment sf = new SwipeFragment();
+            sf.setActivity(this);
+            fragment = sf;
         } else if(settingsFragment.equals(fragmentName)) {
             SettingsFragment sf = new SettingsFragment();
             sf.setActivity(this);

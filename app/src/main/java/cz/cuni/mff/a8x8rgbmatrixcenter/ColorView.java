@@ -48,6 +48,13 @@ public class ColorView extends View implements View.OnClickListener, View.OnLong
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int min_dimension = Math.min(widthMeasureSpec, heightMeasureSpec);
+        min_dimension = Math.max(Math.max(getMinimumWidth(), getMinimumHeight()), min_dimension);
+        setMeasuredDimension(min_dimension, min_dimension);
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
@@ -74,11 +81,19 @@ public class ColorView extends View implements View.OnClickListener, View.OnLong
 
     @Override
     public void onClick(View v) {
+        if(parentView == null){
+            return;
+        }
+
         parentView.colorViewClicked(this);
     }
 
     @Override
     public boolean onLongClick(View v) {
+        if(parentView == null){
+            return true;
+        }
+
         parentView.colorViewLongClicked(this);
         return true;
     }

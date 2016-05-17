@@ -2,4 +2,5 @@
 <resources>
     <item name="custom_color_layout" type="layout">@layout/custom_color_layout_land</item>
     <item name="matrix_layout" type="layout">@layout/matrix_layout_land</item>
+    <item name="swipe_layout" type="layout">@layout/swipe_layout_port</item>
 </resources>
