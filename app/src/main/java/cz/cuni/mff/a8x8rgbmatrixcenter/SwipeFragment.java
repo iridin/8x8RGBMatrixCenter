@@ -1,6 +1,7 @@
 package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.widget.LinearLayout;
 
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_HEIGHT;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.TimedColorService.COLOR_CHAIN_KEY;
 
 /**
  * Created by Dominik Skoda on 19.04.2016.
@@ -24,7 +26,7 @@ public class SwipeFragment extends Fragment {
     private MatrixActivity mActivity;
     private ColorChainAdapter mColorChainAdapter;
     private LEDView[] leds = new LEDView[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
-
+    private Boolean[] fingerIndicator = new Boolean[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
 
 
     private class LedOnTouchListener implements View.OnTouchListener {
@@ -39,10 +41,9 @@ public class SwipeFragment extends Fragment {
         public boolean onTouch(View v, MotionEvent event) {
             if(event.getAction() == MotionEvent.ACTION_UP){
                 for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
-                    LEDView view = mParent.leds[i];
-                    if (view.getColor() != Color.BLACK){
-                        view.setColor(Color.BLACK);
-                        view.invalidate();
+                    if(fingerIndicator[i]) {
+                        fingerIndicator[i] = false;
+                        callTimedColorService(i);
                     }
                 }
                 return true;
@@ -52,11 +53,15 @@ public class SwipeFragment extends Fragment {
                 LEDView view = mParent.leds[i];
                 Rect outRect = new Rect(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
                 if(outRect.contains((int)event.getX(), (int)event.getY())) {
-                    view.setColor(Color.RED);
-                    view.invalidate();
-                } else if (view.getColor() != Color.BLACK){
-                    view.setColor(Color.BLACK);
-                    view.invalidate();
+                    if(!fingerIndicator[i]) {
+                        fingerIndicator[i] = true;
+                        callBluetoothService(i, Color.RED);
+                        view.setColor(Color.RED);
+                        view.invalidate();
+                    }
+                } else if (fingerIndicator[i]){
+                    fingerIndicator[i] = false;
+                    callTimedColorService(i);
                 }
             }
             return true;
@@ -106,7 +111,6 @@ public class SwipeFragment extends Fragment {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(colorChain);
 
-
         // Initialize LED matrix
         MatrixView matrixView = (MatrixView) rootView.findViewById(R.id.matrixView);
         matrixView.setColorSelection(null);
@@ -121,6 +125,11 @@ public class SwipeFragment extends Fragment {
             leds[i] = ledView;
         }
 
+        // Initialize finger indicators
+        for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
+            fingerIndicator[i] = false;
+        }
+
         return rootView;
     }
 
@@ -131,6 +140,22 @@ public class SwipeFragment extends Fragment {
     public void addColor(int color){
         mColorChainAdapter.add(color);
     }
+
+    public void setLedColor(int ledIndex, int color){
+        leds[ledIndex].setColor(color);
+        leds[ledIndex].invalidate();
+    }
+
+    private void callTimedColorService(int ledIndex){
+        Intent intent = new Intent(mActivity, TimedColorService.class);
+        intent.putExtra(COLOR_CHAIN_KEY, mColorChainAdapter.getColorChain(ledIndex));
+        mActivity.startService(intent);
+    }
+
+    private void callBluetoothService(int ledIndex, int color){
+        // TODO:
+    }
+
 
 }
 

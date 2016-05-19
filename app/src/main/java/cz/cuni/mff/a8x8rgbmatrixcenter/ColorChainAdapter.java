@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_KEY;
@@ -29,6 +29,7 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public static final int IMAGE_VIEW_TYPE = 1;
 
     private List<Integer> colorChain;
+    private List<Long> delays;
     private long defaultDelay = 100;
     private Activity mActivity;
 
@@ -40,20 +41,19 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         private ColorChainAdapter parent;
 
         public ColorView colorView;
-        public long delay;
+        public int index;
 
         public ColorViewHolder(View colorView, ColorChainAdapter parent) {
             super(colorView);
             this.colorView = (ColorView) colorView.findViewById(R.id.color_view);
             this.parent = parent;
-            delay = parent.defaultDelay;
+            index = parent.colorChain.size()-1;
         }
 
         @Override
         public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
             final String selection = (String) adapter.getItemAtPosition(position);
-            delay = parent.timeSelectionToMillis(selection);
-            Log.i("ColorViewHolder", "Delay: " + delay);
+            parent.delays.set(index, parent.timeSelectionToMillis(selection));
         }
 
         @Override
@@ -100,8 +100,11 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     // Provide a suitable constructor
     public ColorChainAdapter() {
         colorChain = new ArrayList<>();
+        delays = new ArrayList<>();
         colorChain.add(Color.RED);
-        colorChain.add(Color.GREEN);
+        delays.add(defaultDelay);
+        colorChain.add(Color.BLACK);
+        delays.add(defaultDelay);
     }
 
     // Create new views (invoked by the layout manager)
@@ -156,7 +159,13 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         if(holder instanceof ColorViewHolder) {
-            ((ColorViewHolder) holder).colorView.setColor(colorChain.get(position));
+            ColorViewHolder cvh = (ColorViewHolder) holder;
+            cvh.colorView.setColor(colorChain.get(position));
+            cvh.index = position;
+            Spinner timeSpinner = (Spinner)cvh.itemView.findViewById(R.id.time_spinner);
+            int spinnerPosition = ((ArrayAdapter<CharSequence>) timeSpinner.getAdapter())
+                    .getPosition(delayToTimeSelection(delays.get(position)));
+            timeSpinner.setSelection(spinnerPosition);
         }
     }
 
@@ -173,8 +182,10 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return colorChain.size() + 1; // +1 for the plus icon
     }
 
+
     public void add(int color) {
         colorChain.add(color);
+        delays.add(defaultDelay);
         notifyItemInserted(colorChain.size()-1);
     }
 
@@ -182,6 +193,7 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         int position = viewHolder.getAdapterPosition();
         if(position < colorChain.size()) {
             colorChain.remove(position);
+            delays.remove(position);
             notifyItemRemoved(position);
         }
     }
@@ -223,6 +235,16 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
 
         return result;
+    }
+
+    public ArrayList<TimedColor> getColorChain(int ledIndex){
+        ArrayList<TimedColor> timedColorChain = new ArrayList<>();
+        Long time = Calendar.getInstance().getTimeInMillis();
+        for(int i = 0; i < colorChain.size(); i++){
+            time += delays.get(i);
+            timedColorChain.add(new TimedColor(ledIndex, colorChain.get(i), time));
+        }
+        return timedColorChain;
     }
 
 }

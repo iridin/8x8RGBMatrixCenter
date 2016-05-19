@@ -8,7 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +29,7 @@ public class MatrixActivity extends AppCompatActivity {
     public static final String BT_DEVICE_MAC_KEY = "BT_DEVICE_MAC";
     public static final String BT_DATA_KEY = "BT_DATA";
     public static final String DRAWER_POSITION_KEY = "DRAWER_POSITION";
+    public static final String LED_INDEX_KEY = "LED_INDEX";
     public static final String LED_COLOR_KEY = "LED_COLOR";
 
     public static final int REQUEST_COLOR_SELECT = 1;
@@ -69,6 +72,18 @@ public class MatrixActivity extends AppCompatActivity {
                         }
                         break;
                 }
+            }
+        }
+    };
+
+    private final BroadcastReceiver timedColorBroadcastReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(fragment instanceof SwipeFragment){
+                SwipeFragment sf = (SwipeFragment) fragment;
+                int ledIndex = intent.getIntExtra(LED_INDEX_KEY, 0);
+                int ledColor = intent.getIntExtra(LED_COLOR_KEY, Color.BLACK);
+                sf.setLedColor(ledIndex, ledColor);
             }
         }
     };
@@ -124,14 +139,19 @@ public class MatrixActivity extends AppCompatActivity {
         // Register BT state change broadcast receiver
         IntentFilter btFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(mBTBroadcastReceiver, btFilter);
+
+        // Register color broadcast receiver
+        IntentFilter colorFilter = new IntentFilter(TimedColorService.COLOR_TIMEUP);
+        LocalBroadcastManager.getInstance(this).registerReceiver(timedColorBroadcastReceiver, colorFilter);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        // Unregister BT state change broadcast receiver
+        // Unregister broadcast receivers
         unregisterReceiver(mBTBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(timedColorBroadcastReceiver);
     }
 
     @Override

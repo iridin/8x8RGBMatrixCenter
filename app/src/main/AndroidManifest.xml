@@ -18,6 +18,7 @@
 
         <activity android:name=".CustomColorActivity" />
         <service android:name=".BluetoothService" />
+        <service android:name=".TimedColorService" />
     </application>
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
