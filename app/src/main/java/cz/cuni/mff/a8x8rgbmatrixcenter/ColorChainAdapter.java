@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,19 +60,15 @@ public class ColorChainAdapter extends RecyclerView.Adapter<ColorChainAdapter.Co
 
     // Provide a suitable constructor
     public ColorChainAdapter(Bundle savedInstanceState) {
-        Log.i("ColorChainAdapter", "Create");
         if(savedInstanceState != null) {
-            Log.i("ColorChainAdapter", "Try recover");
             colorChain = (ArrayList<Integer>) savedInstanceState.getSerializable(COLOR_CHAIN_KEY);
             delays = (ArrayList<Long>) savedInstanceState.getSerializable(DELAY_CHAIN_KEY);
             if (colorChain != null) {
-                Log.i("ColorChainAdapter", "Recovered");
                 // Exit on successful recovery
                 return;
             }
         }
 
-        Log.i("ColorChainAdapter", "Not recovered");
         colorChain = new ArrayList<>();
         delays = new ArrayList<>();
 
@@ -89,8 +84,6 @@ public class ColorChainAdapter extends RecyclerView.Adapter<ColorChainAdapter.Co
         // Save current state
         savedInstanceState.putSerializable(COLOR_CHAIN_KEY, colorChain);
         savedInstanceState.putSerializable(DELAY_CHAIN_KEY, delays);
-
-        Log.i("ColorChainAdapter", "Saved");
     }
 
     // Create new views (invoked by the layout manager)

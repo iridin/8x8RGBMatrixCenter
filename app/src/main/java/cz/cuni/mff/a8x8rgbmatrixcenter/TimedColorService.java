@@ -21,43 +21,60 @@ public class TimedColorService extends IntentService {
     public final static String COLOR_CHAIN_KEY = "COLOR_CHAIN";
     public final static String COLOR_TIMEUP = "COLOR_TIMEUP";
 
+    public final static long QUIT_DELAY = 10000; // Milliseconds of inactivity until quit
+
     private static final Boolean debugWorker = false;
 
     private Thread worker;
     private final AbstractQueue<TimedColor> timedColors;
-    private boolean quitWorker = false; // TODO: break the cycle when the app closes
+    private long lastActive;
+    private boolean quitWorker = false;
 
     public TimedColorService() {
         super("TimedColorService");
 
         timedColors = new PriorityBlockingQueue<>();
 
-        worker = new Thread(){
+        worker = null; // Indicates worker not started
+    }
+
+    private synchronized void startWorker() {
+        if(worker != null){
+            // Worker already started
+            return;
+        }
+
+        quitWorker = false;
+        lastActive = Calendar.getInstance().getTimeInMillis();
+        worker = new Thread() {
 
             @Override
             public void run() {
-                if(debugWorker) Log.i("WORKER", "start");
-                while(true){
-                    if(debugWorker) Log.i("WORKER", "step");
-                    if(quitWorker){
-                        if(debugWorker) Log.i("WORKER", "quit");
+                if (debugWorker) Log.i("WORKER", "start " + this);
+                while (true) {
+                    if (debugWorker) Log.i("WORKER", "step " + this);
+                    if (Calendar.getInstance().getTimeInMillis() - lastActive > QUIT_DELAY) {
+                        worker = null;
                         break;
                     }
 
-                    if(timedColors.isEmpty()){
+                    if (timedColors.isEmpty()) {
                         try {
-                            if(debugWorker) Log.i("WORKER", "wait");
+                            if (debugWorker) Log.i("WORKER", "wait " + this);
                             synchronized (this) {
-                                wait();
+                                wait(QUIT_DELAY);
+                                if (debugWorker) Log.i("WORKER", "woke " + this);
                             }
-                        } catch(InterruptedException e){}
+                        } catch (InterruptedException e) {
+                            if (debugWorker) Log.i("WORKER", "interrupted " + this);
+                        }
                         continue;
                     }
 
                     long nextTime = timedColors.peek().time;
                     long now = Calendar.getInstance().getTimeInMillis();
-                    if(now >= nextTime){
-                        if(debugWorker) Log.i("WORKER", "broadcast");
+                    if (now >= nextTime) {
+                        if (debugWorker) Log.i("WORKER", "broadcast " + this);
                         TimedColor nextColor = timedColors.poll();
 
                         Intent intent = new Intent(COLOR_TIMEUP);
@@ -66,12 +83,16 @@ public class TimedColorService extends IntentService {
 
                         LocalBroadcastManager.getInstance(TimedColorService.this).sendBroadcast(intent);
                     } else {
-                        try{
-                            if(debugWorker) Log.i("WORKER", "sleep " + (nextTime - now));
-                            sleep(nextTime - now);
-                        } catch (InterruptedException e) {}
+                        try {
+                            if (debugWorker) Log.i("WORKER", "sleep " + this + " for " + (nextTime - now));
+                            synchronized (worker) {
+                                wait(nextTime - now);
+                            }
+                        } catch (InterruptedException e) {
+                        }
                     }
                 }
+                if (debugWorker) Log.i("WORKER", "quit " + this);
             }
         };
 
@@ -80,10 +101,13 @@ public class TimedColorService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        startWorker();
+
         List<TimedColor> colorChain = (List<TimedColor>) intent.getSerializableExtra(COLOR_CHAIN_KEY);
 
         timedColors.addAll(colorChain);
-        synchronized(worker) {
+        synchronized (worker) {
+            if (debugWorker) Log.i("WORKER", "notified " + worker);
             worker.notify();
         }
     }

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -53,6 +54,13 @@ public class CustomColorActivity extends AppCompatActivity {
 
         colorView = (ColorView) findViewById(R.id.colorPreview);
         colorView.setColor(color);
+    }
+
+    @Override
+    public void onUserLeaveHint() {
+        Log.i("CustomColorActivity", "onUserLeaveHint");
+        // TODO: disconnect device
+        // TODO: break worker loop
     }
 
     @Override

@@ -14,6 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -153,6 +154,13 @@ public class MatrixActivity extends AppCompatActivity {
         // Unregister broadcast receivers
         unregisterReceiver(mBTBroadcastReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(timedColorBroadcastReceiver);
+    }
+
+    @Override
+    public void onUserLeaveHint() {
+        Log.i("MatrixActivity", "onUserLeaveHint");
+        // TODO: disconnect device
+        // TODO: break worker loop
     }
 
     @Override

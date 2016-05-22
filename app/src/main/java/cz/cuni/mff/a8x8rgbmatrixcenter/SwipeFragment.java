@@ -10,7 +10,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -89,8 +88,6 @@ public class SwipeFragment extends Fragment implements Button.OnClickListener {
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View rootView = inflater.inflate(R.layout.swipe_layout, container, false);
-
-        Log.i("SwipeFragment", "onCreateView " + savedInstanceState);
 
         // Remember orientation
         orientation =
