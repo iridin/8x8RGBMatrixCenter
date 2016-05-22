@@ -6,7 +6,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,7 +26,7 @@ import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
  */
 public class BluetoothService extends Service {
 
-    public static final String BT_COMMAND_KEY = "command";
+    public static final String BT_COMMAND_KEY = "COMMAND";
     public static final String BT_DEVICE_MAC_KEY = "BT_DEVICE_MAC";
     public static final String BT_DATA_KEY = "BT_DATA";
 
@@ -33,6 +35,8 @@ public class BluetoothService extends Service {
     public static final String REQUEST_SEND = "send";
 
     private static final long SEND_FAILED_MSG_DELAY = 5000;
+
+    private long lastActive;
 
 
     public class LocalBinder extends Binder {
@@ -59,15 +63,39 @@ public class BluetoothService extends Service {
 
     @Override
     public void onCreate(){
+        Log.i("BluetoothService", "Started");
         connectedDevice = null;
         connectedSocket = null;
         connectedOut = null;
         lastToast = 0L;
+        lastActive = Calendar.getInstance().getTimeInMillis();
+
+        Thread disconnectTimeout = new Thread(){
+            @Override
+            public void run(){
+                while(true) {
+                    if(Calendar.getInstance().getTimeInMillis() - lastActive
+                            > MatrixActivity.DEFAULT_DEVICE_DISCONNECT_TIMEOUT){
+                        break;
+                    }
+                    try {
+                        sleep(MatrixActivity.DEFAULT_DEVICE_DISCONNECT_TIMEOUT);
+                    } catch (InterruptedException e) { }
+                }
+                if(connectedDevice != null) {
+                    disconnect();
+                }
+                stopSelf(); // Stop the service
+                Log.i("BluetoothService", "Stopped");
+            }
+        };
+        disconnectTimeout.start();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         final String command = intent.getStringExtra(BT_COMMAND_KEY);
+        lastActive = Calendar.getInstance().getTimeInMillis();
         switch(command){
             case REQUEST_CONNECT:
                 String deviceMac = intent.getStringExtra(BT_DEVICE_MAC_KEY);
@@ -89,11 +117,6 @@ public class BluetoothService extends Service {
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
         return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        // TODO: disconnect device when the app is terminated
     }
 
     private void connect(String deviceMac){
@@ -127,6 +150,10 @@ public class BluetoothService extends Service {
                             .invoke(connectedDevice, 1);
                     connectedSocket.connect();
                 } catch (Exception e2) {
+                    connectedDevice = null;
+                    connectedSocket = null;
+                    connectedOut = null;
+
                     connectionFailedMessage(deviceMac);
                     return;
                 }
@@ -136,6 +163,11 @@ public class BluetoothService extends Service {
         } catch (IOException e) {
             Log.e("BluetoothActivity", "Can't communicate to device " + deviceMac);
             Log.e("BluetoothActivity", e.getMessage());
+
+            connectedDevice = null;
+            connectedSocket = null;
+            connectedOut = null;
+
             connectionFailedMessage(deviceMac);
         }
 
@@ -143,6 +175,9 @@ public class BluetoothService extends Service {
 
     private void disconnect(){
         if(connectedDevice == null || connectedSocket == null || connectedOut == null){
+            connectedDevice = null;
+            connectedSocket = null;
+            connectedOut = null;
             connectionLostMessage();
             return;
         }
@@ -202,16 +237,18 @@ public class BluetoothService extends Service {
     }
 
     private void connectionFailedMessage(String deviceMac){
+        broadcastConnectionState(false);
         String errMsg = String.format("Couldn't connect to device with MAC: %s", deviceMac);
         Log.e("BluetoothService", errMsg);
-        Toast.makeText(this, errMsg, Toast.LENGTH_SHORT).show();
+        toast(errMsg);
     }
 
     private void connectedMessage(){
+        broadcastConnectionState(true);
         if(connectedDevice != null){
             String msg = String.format("%s connected", connectedDevice.getName());
             Log.i("BluetoothService", msg);
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            toast(msg);
         } else {
             Log.e("BluetoothService",
                     "Trying to log \"connected\" message, but connectedDevice is null.");
@@ -219,10 +256,11 @@ public class BluetoothService extends Service {
     }
 
     private void disconnectedMessage(){
+        broadcastConnectionState(false);
         if(connectedDevice != null){
             String msg = String.format("%s disconnected", connectedDevice.getName());
             Log.i("BluetoothService", msg);
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            toast(msg);
         } else {
             Log.e("BluetoothService",
                     "Trying to log \"disconnected\" message, but connectedDevice is null.");
@@ -230,10 +268,11 @@ public class BluetoothService extends Service {
     }
 
     private void connectionLostMessage(){
+        broadcastConnectionState(false);
         if(connectedDevice != null){
             String msg = String.format("Connection to %s lost", connectedDevice.getName());
             Log.i("BluetoothService", msg);
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            toast(msg);
         } else {
             Log.e("BluetoothService",
                     "Trying to log \"connection lost\" message, but connectedDevice is null.");
@@ -241,18 +280,36 @@ public class BluetoothService extends Service {
     }
 
     private void sendFailedMessage(){
+        broadcastConnectionState(false);
         if(connectedDevice != null){
             String msg = String.format("Sending data to %s failed", connectedDevice.getName());
             Log.i("BluetoothService", msg);
             Calendar now = Calendar.getInstance();
             if(now.getTimeInMillis() - lastToast > SEND_FAILED_MSG_DELAY) {
                 lastToast = now.getTimeInMillis();
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                toast(msg);
             }
         } else {
             Log.e("BluetoothService",
                     "Trying to log \"send failed\" message, but connectedDevice is null.");
         }
+    }
+
+    private void toast(final String msg){
+        Handler h = new Handler(this.getMainLooper());
+
+        h.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(BluetoothService.this, msg, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void broadcastConnectionState(boolean connected){
+        Intent intent = new Intent(MatrixActivity.DEVICE_CONNECTION);
+        intent.putExtra(MatrixActivity.DEVICE_CONNECTION, connected);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private byte[] colors2message(int[] colors) {

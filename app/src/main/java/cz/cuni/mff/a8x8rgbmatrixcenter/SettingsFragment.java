@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ public class SettingsFragment extends Fragment {
     final String[] supportedDevices = new String[]{ "HC-05" };
 
     MatrixActivity mActivity;
+    List<BluetoothDevice> devices;
     Spinner btSpinner;
 
 
@@ -114,7 +116,7 @@ public class SettingsFragment extends Fragment {
         BluetoothAdapter btAdapter = mActivity.getBTAdapter();
         // Create BT options
         List<String> deviceNames = new ArrayList<>();
-        List<BluetoothDevice> devices = new ArrayList<>();
+        devices = new ArrayList<>();
         deviceNames.add("No Device");
         devices.add(null); // Corresponds to "No Device"
         Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
@@ -145,6 +147,12 @@ public class SettingsFragment extends Fragment {
 
     public void setActivity(MatrixActivity activity){
         mActivity = activity;
+    }
+
+    public void refreshConnectedDevice(){
+        int spinnerPosition = devices.indexOf(mActivity.getConnectedDevice());
+        btSpinner.setSelection(spinnerPosition);
+        btSpinner.invalidate();
     }
 
 }

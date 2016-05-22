@@ -14,7 +14,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -34,7 +33,11 @@ public class MatrixActivity extends AppCompatActivity {
     public static final String DRAWER_POSITION_KEY = "DRAWER_POSITION";
     public static final String LED_INDEX_KEY = "LED_INDEX";
     public static final String LED_COLOR_KEY = "LED_COLOR";
-    public static final String MESSAGE_KEY = "MESSAGE";
+
+    public static final String DEVICE_CONNECTION = "DEVICE_CONNECTION";
+
+    public static final String DEFAULT_DEVICE_DISCONNECT_TIMEOUT_KEY = "DISCONNECT_TIMEOUT";
+    public static final long DEFAULT_DEVICE_DISCONNECT_TIMEOUT = 30000; // TODO: provide config of this value in settings fragment (save the value on exit), limit lower and upper value
 
     public static final int REQUEST_COLOR_SELECT = 1;
     public static final int REQUEST_NEW_COLOR = 2;
@@ -86,6 +89,19 @@ public class MatrixActivity extends AppCompatActivity {
                 int ledIndex = intent.getIntExtra(LED_INDEX_KEY, 0);
                 int ledColor = intent.getIntExtra(LED_COLOR_KEY, Color.BLACK);
                 sf.setLedColor(ledIndex, ledColor);
+            }
+        }
+    };
+
+    private final BroadcastReceiver deviceConnectionChangedReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(!intent.getBooleanExtra(DEVICE_CONNECTION, false)) {
+                connectedDevice = null;
+            }
+            if(fragment instanceof SettingsFragment){
+                SettingsFragment sf = (SettingsFragment) fragment;
+                sf.refreshConnectedDevice();
             }
         }
     };
@@ -145,6 +161,10 @@ public class MatrixActivity extends AppCompatActivity {
         // Register color broadcast receiver
         IntentFilter colorFilter = new IntentFilter(TimedColorService.COLOR_TIMEUP);
         LocalBroadcastManager.getInstance(this).registerReceiver(timedColorBroadcastReceiver, colorFilter);
+
+        // Register device connection changed receiver
+        IntentFilter connectionFilter = new IntentFilter(DEVICE_CONNECTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(deviceConnectionChangedReceiver, connectionFilter);
     }
 
     @Override
@@ -154,13 +174,7 @@ public class MatrixActivity extends AppCompatActivity {
         // Unregister broadcast receivers
         unregisterReceiver(mBTBroadcastReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(timedColorBroadcastReceiver);
-    }
-
-    @Override
-    public void onUserLeaveHint() {
-        Log.i("MatrixActivity", "onUserLeaveHint");
-        // TODO: disconnect device
-        // TODO: break worker loop
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(deviceConnectionChangedReceiver);
     }
 
     @Override
