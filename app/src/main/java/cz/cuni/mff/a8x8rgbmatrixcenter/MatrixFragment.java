@@ -20,12 +20,13 @@ import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
 /**
  * Created by Dominik Skoda on 19.04.2016.
  */
-public class MatrixFragment extends Fragment implements Button.OnClickListener {
-// TODO: remove send button
+public class MatrixFragment extends Fragment implements View.OnClickListener  {
+
     private MatrixActivity mActivity;
-    Button sendButton;
+    private ColorSelectionView paletteView;
     private LEDView[] leds = new LEDView[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
     private int[] initialColors;
+
 
     public MatrixFragment() {
         // Empty constructor required for fragment subclasses
@@ -38,7 +39,7 @@ public class MatrixFragment extends Fragment implements Button.OnClickListener {
         View rootView = inflater.inflate(R.layout.matrix_layout, container, false);
 
         // Initialize Color palette
-        ColorSelectionView paletteView = (ColorSelectionView) rootView.findViewById(R.id.colorSelectionView);
+        paletteView = (ColorSelectionView) rootView.findViewById(R.id.colorSelectionView);
         paletteView.setActivity(getActivity());
         for(int i = 0; i < COLOR_COUNT; i++) {
             View view = inflater.inflate(R.layout.color_layout, paletteView, false);
@@ -49,7 +50,6 @@ public class MatrixFragment extends Fragment implements Button.OnClickListener {
 
         // Initialize LED matrix
         MatrixView matrixView = (MatrixView) rootView.findViewById(R.id.matrixView);
-        matrixView.setColorSelection(paletteView);
         for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
             View view = inflater.inflate(R.layout.led_layout, matrixView, false);
             LEDView ledView = (LEDView) view.findViewById(R.id.led_view);
@@ -59,7 +59,7 @@ public class MatrixFragment extends Fragment implements Button.OnClickListener {
 
             ledView.setLedMatrix(matrixView);
             matrixView.addView(ledView);
-            ledView.setOnClickListener(matrixView);
+            ledView.setOnClickListener(this);
 
             leds[i] = ledView;
         }
@@ -67,13 +67,6 @@ public class MatrixFragment extends Fragment implements Button.OnClickListener {
         // Register buttons
         Button clearButton = (Button) rootView.findViewById(R.id.clear_button);
         clearButton.setOnClickListener(this);
-        sendButton = (Button) rootView.findViewById(R.id.send_button);
-        sendButton.setOnClickListener(this);
-        if(mActivity == null || mActivity.getConnectedDevice() == null){
-            sendButton.setEnabled(false);
-        } else {
-            sendButton.setEnabled(true);
-        }
 
         return rootView;
     }
@@ -94,34 +87,28 @@ public class MatrixFragment extends Fragment implements Button.OnClickListener {
         mActivity = activity;
     }
 
-    public void setBTConnected(boolean connected){
-        if(sendButton != null){
-            sendButton.setEnabled(connected);
-        }
-    }
-
-    @Override
+    @Override // TODO
     public void onClick(View v) {
         switch(v.getId()){
-            case R.id.send_button:
-                BluetoothDevice btDevice = mActivity.getConnectedDevice();
-                if(btDevice != null) {
-                    int colors[] = new int[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
-                    for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++){
-                        colors[i] = leds[i].getColor();
-                    }
-
-                    Intent intent = new Intent(mActivity, BluetoothService.class);
-                    intent.putExtra(BT_COMMAND_KEY, REQUEST_SEND);
-                    intent.putExtra(BT_DATA_KEY, colors);
-                    mActivity.startService(intent);
+            case R.id.led_view:
+                if(paletteView == null){
+                    return;
                 }
+
+                LEDView ledView = (LEDView) v;
+                int color = paletteView.getColor();
+                ledView.setColor(color);
+                ledView.invalidate();
+
+                sendData();
                 break;
             case R.id.clear_button:
                 for(LEDView view : leds){
                     view.setColor(Color.BLACK);
                     view.invalidate();
                 }
+                
+                sendData();
                 break;
             default:
                 throw new IllegalStateException(String.format(
@@ -130,5 +117,19 @@ public class MatrixFragment extends Fragment implements Button.OnClickListener {
         }
     }
 
+    private void sendData(){
+        BluetoothDevice btDevice = mActivity.getConnectedDevice();
+        if(btDevice != null) {
+            int colors[] = new int[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
+            for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++){
+                colors[i] = leds[i].getColor();
+            }
+
+            Intent intent = new Intent(mActivity, BluetoothService.class);
+            intent.putExtra(BT_COMMAND_KEY, REQUEST_SEND);
+            intent.putExtra(BT_DATA_KEY, colors);
+            mActivity.startService(intent);
+        }
+    }
 }
 

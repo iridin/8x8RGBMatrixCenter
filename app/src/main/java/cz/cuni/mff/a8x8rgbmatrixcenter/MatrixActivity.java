@@ -62,7 +62,6 @@ public class MatrixActivity extends AppCompatActivity {
                             sf.disableBTSpinner();
                          } else if(fragment instanceof MatrixFragment){
                             MatrixFragment mf = (MatrixFragment) fragment;
-                            mf.setBTConnected(false);
                         }
                         break;
                     case BluetoothAdapter.STATE_ON:
@@ -71,7 +70,6 @@ public class MatrixActivity extends AppCompatActivity {
                             sf.fillBTDevices();
                         } else if(fragment instanceof MatrixFragment){
                             MatrixFragment mf = (MatrixFragment) fragment;
-                            mf.setBTConnected(true);
                         }
                         break;
                 }

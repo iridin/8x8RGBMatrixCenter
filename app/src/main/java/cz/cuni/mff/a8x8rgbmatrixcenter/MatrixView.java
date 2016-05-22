@@ -5,13 +5,12 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.ViewGroup;
 
 /**
  * Created by Dominik Skoda on 19.04.2016.
  */
-public class MatrixView extends ViewGroup  implements View.OnClickListener {
+public class MatrixView extends ViewGroup {
 
     public static final int LED_ARRAY_WIDTH = 8;
     public static final int LED_ARRAY_HEIGHT = 8;
@@ -19,7 +18,6 @@ public class MatrixView extends ViewGroup  implements View.OnClickListener {
     private float ledMargin = 0;
     private int ledBackground = Color.WHITE;
 
-    private ColorSelectionView colorSelection = null;
 
     public MatrixView(Context context) {
         super(context);
@@ -91,20 +89,4 @@ public class MatrixView extends ViewGroup  implements View.OnClickListener {
         return ledBackground;
     }
 
-    public void setColorSelection(ColorSelectionView view){
-        colorSelection = view;
-    }
-
-    @Override
-    public void onClick(View v) {
-        if(colorSelection == null){
-            return;
-        }
-
-        LEDView ledView = (LEDView) v;
-        int color = colorSelection.getColor();
-        ledView.setColor(color);
-        ledView.invalidate();
-
-    }
 }

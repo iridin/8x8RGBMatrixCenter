@@ -113,7 +113,6 @@ public class SwipeFragment extends Fragment {
 
         // Initialize LED matrix
         MatrixView matrixView = (MatrixView) rootView.findViewById(R.id.matrixView);
-        matrixView.setColorSelection(null);
         matrixView.setOnTouchListener(new LedOnTouchListener(this));
         for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
             View view = inflater.inflate(R.layout.led_layout, matrixView, false);
