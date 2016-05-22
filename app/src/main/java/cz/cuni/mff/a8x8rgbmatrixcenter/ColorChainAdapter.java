@@ -2,7 +2,9 @@ package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +14,6 @@ import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 
 /**
@@ -20,8 +21,12 @@ import java.util.List;
  */
 public class ColorChainAdapter extends RecyclerView.Adapter<ColorChainAdapter.ColorViewHolder> {
 
-    private List<Integer> colorChain;
-    private List<Long> delays;
+    public static final String COLOR_CHAIN_KEY = "COLOR_CHAIN";
+    public static final String DELAY_CHAIN_KEY = "DELAY_CHAIN";
+
+
+    private ArrayList<Integer> colorChain;
+    private ArrayList<Long> delays;
     private long defaultDelay = 100;
     private Activity mActivity;
 
@@ -54,9 +59,21 @@ public class ColorChainAdapter extends RecyclerView.Adapter<ColorChainAdapter.Co
         }
     }
 
-
     // Provide a suitable constructor
-    public ColorChainAdapter() {
+    public ColorChainAdapter(Bundle savedInstanceState) {
+        Log.i("ColorChainAdapter", "Create");
+        if(savedInstanceState != null) {
+            Log.i("ColorChainAdapter", "Try recover");
+            colorChain = (ArrayList<Integer>) savedInstanceState.getSerializable(COLOR_CHAIN_KEY);
+            delays = (ArrayList<Long>) savedInstanceState.getSerializable(DELAY_CHAIN_KEY);
+            if (colorChain != null) {
+                Log.i("ColorChainAdapter", "Recovered");
+                // Exit on successful recovery
+                return;
+            }
+        }
+
+        Log.i("ColorChainAdapter", "Not recovered");
         colorChain = new ArrayList<>();
         delays = new ArrayList<>();
 
@@ -65,6 +82,15 @@ public class ColorChainAdapter extends RecyclerView.Adapter<ColorChainAdapter.Co
         delays.add(defaultDelay);
         colorChain.add(Color.BLACK);
         delays.add(defaultDelay);
+    }
+
+
+    public void saveInstanceState(Bundle savedInstanceState) {
+        // Save current state
+        savedInstanceState.putSerializable(COLOR_CHAIN_KEY, colorChain);
+        savedInstanceState.putSerializable(DELAY_CHAIN_KEY, delays);
+
+        Log.i("ColorChainAdapter", "Saved");
     }
 
     // Create new views (invoked by the layout manager)

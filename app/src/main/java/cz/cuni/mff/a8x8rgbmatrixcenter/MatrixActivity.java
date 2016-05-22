@@ -216,7 +216,10 @@ public class MatrixActivity extends AppCompatActivity {
         final String aboutFragment = getString(R.string.about_string);
 
         if(matrixFragment.equals(fragmentName)) {
-            MatrixFragment mf = new MatrixFragment();
+            MatrixFragment mf = (MatrixFragment) getFragmentManager().findFragmentByTag(fragmentName);
+            if(mf == null) {
+                mf = new MatrixFragment();
+            }
             if (savedInstanceState != null) {
                 int[] ledColors = savedInstanceState.getIntArray(LED_COLOR_KEY);
                 mf.setLedColors(ledColors);
@@ -224,22 +227,31 @@ public class MatrixActivity extends AppCompatActivity {
             mf.setActivity(this);
             fragment = mf;
         } else if(swipeFragment.equals(fragmentName)){
-            SwipeFragment sf = new SwipeFragment();
+            SwipeFragment sf = (SwipeFragment) getFragmentManager().findFragmentByTag(fragmentName);
+            if(sf == null) {
+                sf = new SwipeFragment();
+            }
             sf.setActivity(this);
             fragment = sf;
         } else if(settingsFragment.equals(fragmentName)) {
-            SettingsFragment sf = new SettingsFragment();
+            SettingsFragment sf = (SettingsFragment) getFragmentManager().findFragmentByTag(fragmentName);
+            if(sf == null) {
+                sf = new SettingsFragment();
+            }
             sf.setActivity(this);
             fragment = sf;
         } else if(aboutFragment.equals(fragmentName)) {
-            fragment = new AboutFragment();
+            fragment = getFragmentManager().findFragmentByTag(fragmentName);
+            if(fragment == null) {
+                fragment = new AboutFragment();
+            }
         } else {
             throw new UnsupportedOperationException(String.format("The \"%s\" fragment in menu is not supported.", fragmentName));
         }
 
         // Insert the fragment by replacing any existing fragment
         getFragmentManager().beginTransaction()
-                .replace(R.id.content_frame, fragment)
+                .replace(R.id.content_frame, fragment, fragmentName)
                 .commit();
         drawerPosition = position;
     }

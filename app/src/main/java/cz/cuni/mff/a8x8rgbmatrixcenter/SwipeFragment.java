@@ -2,6 +2,7 @@ package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,10 +31,11 @@ import static cz.cuni.mff.a8x8rgbmatrixcenter.TimedColorService.COLOR_CHAIN_KEY;
 /**
  * Created by Dominik Skoda on 19.04.2016.
  */
-public class SwipeFragment extends Fragment implements Button.OnClickListener{
-// TODO: make floating plus button
+public class SwipeFragment extends Fragment implements Button.OnClickListener {
+
     private MatrixActivity mActivity;
     private ColorChainAdapter mColorChainAdapter;
+    private Orientation orientation;
     private LEDView[] leds = new LEDView[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
     private Boolean[] fingerIndicator = new Boolean[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
 
@@ -87,18 +90,34 @@ public class SwipeFragment extends Fragment implements Button.OnClickListener{
         super.onCreateView(inflater, container, savedInstanceState);
         View rootView = inflater.inflate(R.layout.swipe_layout, container, false);
 
+        Log.i("SwipeFragment", "onCreateView " + savedInstanceState);
+
+        // Remember orientation
+        orientation =
+                getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
+            ? Orientation.horizontal
+            : Orientation.vertical;
+
         // Initialize list of colors
         RecyclerView colorChain = (RecyclerView) rootView.findViewById(R.id.colors_chain);
         colorChain.setHasFixedSize(true);
+        //orientation = colorChain.getLayoutParams().
         // use a linear layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        layoutManager.setOrientation(LinearLayout.HORIZONTAL);
+        if(orientation == Orientation.horizontal) {
+            layoutManager.setOrientation(LinearLayout.VERTICAL);
+        } else {
+            layoutManager.setOrientation(LinearLayout.HORIZONTAL);
+        }
         colorChain.setLayoutManager(layoutManager);
-        mColorChainAdapter = new ColorChainAdapter();
+        mColorChainAdapter = new ColorChainAdapter(savedInstanceState);
         mColorChainAdapter.setActivity(mActivity);
         colorChain.setAdapter(mColorChainAdapter);
         // Assign ItemTouchHelper
-        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.UP | ItemTouchHelper.DOWN) {
+        int remSwipeDirections = orientation == Orientation.horizontal
+                ? ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT
+                : ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, remSwipeDirections) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                 return false;
@@ -135,6 +154,15 @@ public class SwipeFragment extends Fragment implements Button.OnClickListener{
         }
 
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save current state
+        mColorChainAdapter.saveInstanceState(savedInstanceState);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override

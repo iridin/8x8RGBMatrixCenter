@@ -87,7 +87,7 @@ public class MatrixFragment extends Fragment implements View.OnClickListener  {
         mActivity = activity;
     }
 
-    @Override // TODO
+    @Override
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.led_view:
