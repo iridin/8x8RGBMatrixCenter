@@ -22,7 +22,7 @@ import static cz.cuni.mff.a8x8rgbmatrixcenter.TimedColorService.COLOR_CHAIN_KEY;
  * Created by Dominik Skoda on 19.04.2016.
  */
 public class SwipeFragment extends Fragment {
-
+// TODO: make floating plus button
     private MatrixActivity mActivity;
     private ColorChainAdapter mColorChainAdapter;
     private LEDView[] leds = new LEDView[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
@@ -153,7 +153,9 @@ public class SwipeFragment extends Fragment {
     }
 
     private void callBluetoothService(int ledIndex, int color){
-        // TODO:
+        if(mActivity != null && mActivity.getConnectedDevice() != null) {
+            // TODO: call BT service
+        }
     }
 
 

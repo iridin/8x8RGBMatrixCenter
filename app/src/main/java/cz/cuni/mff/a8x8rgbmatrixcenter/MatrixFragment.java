@@ -10,9 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_COMMAND_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_DATA_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.REQUEST_SEND;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_COUNT;
-import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.BT_DEVICE_MAC_KEY;
-import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.BT_DATA_KEY;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_HEIGHT;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
 
@@ -20,7 +21,7 @@ import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
  * Created by Dominik Skoda on 19.04.2016.
  */
 public class MatrixFragment extends Fragment implements Button.OnClickListener {
-
+// TODO: remove send button
     private MatrixActivity mActivity;
     Button sendButton;
     private LEDView[] leds = new LEDView[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
@@ -111,7 +112,7 @@ public class MatrixFragment extends Fragment implements Button.OnClickListener {
                     }
 
                     Intent intent = new Intent(mActivity, BluetoothService.class);
-                    intent.putExtra(BT_DEVICE_MAC_KEY, btDevice.getAddress());
+                    intent.putExtra(BT_COMMAND_KEY, REQUEST_SEND);
                     intent.putExtra(BT_DATA_KEY, colors);
                     mActivity.startService(intent);
                 }

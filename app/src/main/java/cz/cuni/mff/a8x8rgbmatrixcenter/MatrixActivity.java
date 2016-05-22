@@ -19,6 +19,10 @@ import android.widget.ListView;
 
 import java.util.Set;
 
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_COMMAND_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_DEVICE_MAC_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.REQUEST_CONNECT;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.REQUEST_DISCONNECT;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_KEY;
 
 /**
@@ -26,11 +30,10 @@ import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_KEY;
  */
 public class MatrixActivity extends AppCompatActivity {
 
-    public static final String BT_DEVICE_MAC_KEY = "BT_DEVICE_MAC";
-    public static final String BT_DATA_KEY = "BT_DATA";
     public static final String DRAWER_POSITION_KEY = "DRAWER_POSITION";
     public static final String LED_INDEX_KEY = "LED_INDEX";
     public static final String LED_COLOR_KEY = "LED_COLOR";
+    public static final String MESSAGE_KEY = "MESSAGE";
 
     public static final int REQUEST_COLOR_SELECT = 1;
     public static final int REQUEST_NEW_COLOR = 2;
@@ -119,7 +122,7 @@ public class MatrixActivity extends AppCompatActivity {
             drawerPosition = savedInstanceState.getInt(DRAWER_POSITION_KEY);
 
             // Retrieve connected deviec
-            String connectedDeviceMAC = savedInstanceState.getString(BT_DEVICE_MAC_KEY, null);
+            String connectedDeviceMAC = savedInstanceState.getString(BluetoothService.BT_DEVICE_MAC_KEY, null);
             if(connectedDeviceMAC != null
                     && mBluetoothAdapter != null
                     && mBluetoothAdapter.isEnabled()){
@@ -167,7 +170,7 @@ public class MatrixActivity extends AppCompatActivity {
             mf.saveMatrixState(savedInstanceState);
         }
         if(connectedDevice != null) {
-            savedInstanceState.putString(BT_DEVICE_MAC_KEY, connectedDevice.getAddress());
+            savedInstanceState.putString(BluetoothService.BT_DEVICE_MAC_KEY, connectedDevice.getAddress());
         }
 
         // Always call the superclass so it can save the view hierarchy state
@@ -248,7 +251,20 @@ public class MatrixActivity extends AppCompatActivity {
     }
 
     public void setConnectedDevice(BluetoothDevice device){
+        if(connectedDevice != null){
+            Intent intent = new Intent(this, BluetoothService.class);
+            intent.putExtra(BT_COMMAND_KEY, REQUEST_DISCONNECT);
+            startService(intent);
+        }
+
         connectedDevice = device;
+
+        if(connectedDevice != null) {
+            Intent intent = new Intent(this, BluetoothService.class);
+            intent.putExtra(BT_COMMAND_KEY, REQUEST_CONNECT);
+            intent.putExtra(BT_DEVICE_MAC_KEY, connectedDevice.getAddress());
+            startService(intent);
+        }
     }
 
     public BluetoothDevice getConnectedDevice(){
