@@ -1,7 +1,6 @@
 package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,18 +14,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_KEY;
-import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_VIEW_INDEX_KEY;
-import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.REQUEST_NEW_COLOR;
-
 
 /**
  * Created by Dominik Skoda on 11.05.2016.
  */
-public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
-    public static final int COLOR_VIEW_TYPE = 0;
-    public static final int IMAGE_VIEW_TYPE = 1;
+public class ColorChainAdapter extends RecyclerView.Adapter<ColorChainAdapter.ColorViewHolder> {
 
     private List<Integer> colorChain;
     private List<Long> delays;
@@ -62,45 +54,13 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
     }
 
-    public static class ImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AdapterView.OnItemSelectedListener {
-
-        private ColorChainAdapter parent;
-
-        public ImageViewHolder(View imageView, ColorChainAdapter parent){
-            super(imageView);
-            imageView.setOnClickListener(this);
-            this.parent = parent;
-        }
-
-        @Override
-        public void onClick(View v) {
-            if(parent.mActivity == null){
-                return;
-            }
-
-            Intent intent = new Intent(parent.mActivity, CustomColorActivity.class);
-            intent.putExtra(COLOR_KEY, Color.BLACK);
-            intent.putExtra(COLOR_VIEW_INDEX_KEY, 0);
-            parent.mActivity.startActivityForResult(intent, REQUEST_NEW_COLOR);
-        }
-
-        @Override
-        public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
-            final String selection = (String) adapter.getItemAtPosition(position);
-            parent.defaultDelay = parent.timeSelectionToMillis(selection);
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-            // Do nothing
-        }
-
-    }
 
     // Provide a suitable constructor
     public ColorChainAdapter() {
         colorChain = new ArrayList<>();
         delays = new ArrayList<>();
+
+        // Add default colors to the chain
         colorChain.add(Color.RED);
         delays.add(defaultDelay);
         colorChain.add(Color.BLACK);
@@ -109,26 +69,12 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     // Create new views (invoked by the layout manager)
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        RecyclerView.ViewHolder vh;
-        View v;
-        switch(viewType) {
-            case COLOR_VIEW_TYPE:
-                v = LayoutInflater.from(parent.getContext())
+    public ColorViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.color_time_layout, parent, false);
-                vh = new ColorViewHolder(v, this);
-                break;
-            case IMAGE_VIEW_TYPE:
-                v = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.image_time_layout, parent, false);
-                vh = new ImageViewHolder(v, this);
-                break;
-            default:
-                throw new IllegalStateException(String.format(
-                        "The view type %d not supported by the ColorChainAdapter.", viewType));
-        }
+        ColorViewHolder vh = new ColorViewHolder(v, this);
 
-        // Create theme options
+        // Create time options
         Spinner timeSpinner = (Spinner) v.findViewById(R.id.time_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> timeAdapter = ArrayAdapter.createFromResource(parent.getContext(),
@@ -141,47 +87,29 @@ public class ColorChainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         int spinnerPosition = timeAdapter.getPosition(delayToTimeSelection(defaultDelay));
         timeSpinner.setSelection(spinnerPosition);
 
-        switch(viewType) {
-            case COLOR_VIEW_TYPE:
-                timeSpinner.setOnItemSelectedListener((ColorViewHolder) vh);
-                break;
-            case IMAGE_VIEW_TYPE:
-                timeSpinner.setOnItemSelectedListener((ImageViewHolder) vh);
-                break;
-        }
+        timeSpinner.setOnItemSelectedListener((ColorViewHolder) vh);
 
         return vh;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(ColorViewHolder cvh, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        if(holder instanceof ColorViewHolder) {
-            ColorViewHolder cvh = (ColorViewHolder) holder;
-            cvh.colorView.setColor(colorChain.get(position));
-            cvh.index = position;
-            Spinner timeSpinner = (Spinner)cvh.itemView.findViewById(R.id.time_spinner);
-            int spinnerPosition = ((ArrayAdapter<CharSequence>) timeSpinner.getAdapter())
-                    .getPosition(delayToTimeSelection(delays.get(position)));
-            timeSpinner.setSelection(spinnerPosition);
-        }
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        return position < colorChain.size()
-                ? COLOR_VIEW_TYPE
-                : IMAGE_VIEW_TYPE;
+        cvh.colorView.setColor(colorChain.get(position));
+        cvh.index = position;
+        Spinner timeSpinner = (Spinner)cvh.itemView.findViewById(R.id.time_spinner);
+        int spinnerPosition = ((ArrayAdapter<CharSequence>) timeSpinner.getAdapter())
+                .getPosition(delayToTimeSelection(delays.get(position)));
+        timeSpinner.setSelection(spinnerPosition);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return colorChain.size() + 1; // +1 for the plus icon
+        return colorChain.size();
     }
-
 
     public void add(int color) {
         colorChain.add(color);

@@ -6,12 +6,32 @@
     android:orientation="vertical"
     tools:context="cz.cuni.mff.a8x8rgbmatrixcenter.SwipeFragment">
 
-    <android.support.v7.widget.RecyclerView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_weight="1"
-        android:id="@+id/colors_chain" />
+    <android.support.design.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/colors_chain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|right"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:src="@android:drawable/ic_input_add"
+            android:tint="@color/colorPrimaryDark"
+            app:layout_anchor="@id/colors_chain"
+            app:layout_anchorGravity="top|right|end"
+            android:id="@+id/colors_chain_add"/>
+
+    </android.support.design.widget.CoordinatorLayout>
 
 
     <cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView

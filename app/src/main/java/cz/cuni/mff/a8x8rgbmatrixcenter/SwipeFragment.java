@@ -1,11 +1,11 @@
 package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.Fragment;
-import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -13,11 +13,15 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 
 import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_COMMAND_KEY;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_DATA_KEY;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.REQUEST_SEND;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_VIEW_INDEX_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixActivity.REQUEST_NEW_COLOR;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_HEIGHT;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.TimedColorService.COLOR_CHAIN_KEY;
@@ -25,7 +29,7 @@ import static cz.cuni.mff.a8x8rgbmatrixcenter.TimedColorService.COLOR_CHAIN_KEY;
 /**
  * Created by Dominik Skoda on 19.04.2016.
  */
-public class SwipeFragment extends Fragment {
+public class SwipeFragment extends Fragment implements Button.OnClickListener{
 // TODO: make floating plus button
     private MatrixActivity mActivity;
     private ColorChainAdapter mColorChainAdapter;
@@ -104,17 +108,13 @@ public class SwipeFragment extends Fragment {
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 mColorChainAdapter.remove(viewHolder);
             }
-
-            @Override
-            public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-                if (viewHolder instanceof ColorChainAdapter.ImageViewHolder){
-                    return 0;
-                }
-                return super.getSwipeDirs(recyclerView, viewHolder);
-            }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(colorChain);
+
+        // Initialize Add button
+        FloatingActionButton addButton = (FloatingActionButton) rootView.findViewById(R.id.colors_chain_add);
+        addButton.setOnClickListener(this);
 
         // Initialize LED matrix
         MatrixView matrixView = (MatrixView) rootView.findViewById(R.id.matrixView);
@@ -135,6 +135,18 @@ public class SwipeFragment extends Fragment {
         }
 
         return rootView;
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(mActivity == null){
+            return;
+        }
+
+        Intent intent = new Intent(mActivity, CustomColorActivity.class);
+        intent.putExtra(COLOR_KEY, Color.BLACK);
+        intent.putExtra(COLOR_VIEW_INDEX_KEY, 0);
+        mActivity.startActivityForResult(intent, REQUEST_NEW_COLOR);
     }
 
     public void setActivity(MatrixActivity activity){
@@ -160,7 +172,6 @@ public class SwipeFragment extends Fragment {
 
     private void callBluetoothService(){ // TODO: send only one LED value
         if(mActivity != null && mActivity.getConnectedDevice() != null) {
-            BluetoothDevice btDevice = mActivity.getConnectedDevice();
             int colors[] = new int[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
             for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++){
                 colors[i] = leds[i].getColor();
