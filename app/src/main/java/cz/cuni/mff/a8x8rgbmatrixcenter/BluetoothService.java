@@ -255,60 +255,6 @@ public class BluetoothService extends Service {
         }
     }
 
-   /*protected void onHandleIntent(Intent intent) {
-        String connectedDeviceMac = intent.getStringExtra(BT_DEVICE_MAC_KEY);
-        Log.i("MAC", connectedDeviceMac);
-        int[] colors = intent.getIntArrayExtra(BT_DATA_KEY);
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice connectedDevice = null;
-
-        if (connectedDeviceMac != null
-                && btAdapter != null
-                && btAdapter.isEnabled()) {
-            Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
-            for (BluetoothDevice device : pairedDevices) {
-                if (device.getAddress().equals(connectedDeviceMac)) {
-                    connectedDevice = device;
-                }
-            }
-        }
-
-        if (connectedDevice != null) {
-            try {
-                // UUID: 00001101-0000-1000-8000-00805f9b34fb
-                // UUID: 00000000-0000-1000-8000-00805f9b34fb
-                UUID uuid = connectedDevice.getUuids()[0].getUuid();
-                Log.i("UUID", uuid.toString());
-                BluetoothSocket socket = connectedDevice.createInsecureRfcommSocketToServiceRecord(uuid);
-
-                try {
-                    socket.connect();
-                } catch (IOException e) { // TODO: FIXME: nasty fallback  :-(
-                    // HACK by http://stackoverflow.com/questions/18657427/ioexception-read-failed-socket-might-closed-bluetooth-on-android-4-3
-                    Log.e("BluetoothActivity", e.getMessage());
-                    try {
-                        Log.e("BluetoothActivity", "trying fallback...");
-
-                        socket = (BluetoothSocket) connectedDevice.getClass().getMethod("createInsecureRfcommSocket", new Class[]{int.class}).invoke(connectedDevice, 1);
-                        socket.connect();
-
-                        Log.e("BluetoothActivity", "Connected");
-                    } catch (Exception e2) {
-                        Log.e("BluetoothActivity", "Couldn't establish Bluetooth connection!");
-                    }
-                }
-                OutputStream out = socket.getOutputStream();
-                out.write(colors2message(colors));
-
-                out.close();
-                socket.close();
-            } catch (IOException e) {
-                Log.e("BluetoothActivity", "Can't communicate to device " + connectedDeviceMac);
-                Log.e("BluetoothActivity", e.getMessage());
-            }
-        }
-    }*/
-
     private byte[] colors2message(int[] colors) {
         byte[] msg = new byte[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH + 2];
         msg[0] = (byte) 0b10000000;

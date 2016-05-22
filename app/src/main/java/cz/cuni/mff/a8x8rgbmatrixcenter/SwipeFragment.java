@@ -1,6 +1,7 @@
 package cz.cuni.mff.a8x8rgbmatrixcenter;
 
 import android.app.Fragment;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -14,6 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_COMMAND_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_DATA_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.REQUEST_SEND;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_HEIGHT;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.MatrixView.LED_ARRAY_WIDTH;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.TimedColorService.COLOR_CHAIN_KEY;
@@ -55,7 +59,8 @@ public class SwipeFragment extends Fragment {
                 if(outRect.contains((int)event.getX(), (int)event.getY())) {
                     if(!fingerIndicator[i]) {
                         fingerIndicator[i] = true;
-                        callBluetoothService(i, Color.RED);
+                        //callBluetoothService(i, Color.RED);
+                        callBluetoothService();
                         view.setColor(Color.RED);
                         view.invalidate();
                     }
@@ -143,6 +148,8 @@ public class SwipeFragment extends Fragment {
     public void setLedColor(int ledIndex, int color){
         leds[ledIndex].setColor(color);
         leds[ledIndex].invalidate();
+
+        callBluetoothService();
     }
 
     private void callTimedColorService(int ledIndex){
@@ -151,9 +158,18 @@ public class SwipeFragment extends Fragment {
         mActivity.startService(intent);
     }
 
-    private void callBluetoothService(int ledIndex, int color){
+    private void callBluetoothService(){ // TODO: send only one LED value
         if(mActivity != null && mActivity.getConnectedDevice() != null) {
-            // TODO: call BT service
+            BluetoothDevice btDevice = mActivity.getConnectedDevice();
+            int colors[] = new int[LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH];
+            for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++){
+                colors[i] = leds[i].getColor();
+            }
+
+            Intent intent = new Intent(mActivity, BluetoothService.class);
+            intent.putExtra(BT_COMMAND_KEY, REQUEST_SEND);
+            intent.putExtra(BT_DATA_KEY, colors);
+            mActivity.startService(intent);
         }
     }
 

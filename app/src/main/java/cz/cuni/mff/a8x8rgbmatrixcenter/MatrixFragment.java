@@ -107,7 +107,7 @@ public class MatrixFragment extends Fragment implements View.OnClickListener  {
                     view.setColor(Color.BLACK);
                     view.invalidate();
                 }
-                
+
                 sendData();
                 break;
             default:
