@@ -101,6 +101,12 @@ public class BluetoothService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if(intent == null){
+            // Handle the state after the app is killed
+            stopSelf(); // Stop the service
+            return START_NOT_STICKY;
+        }
+
         final String command = intent.getStringExtra(BT_COMMAND_KEY);
         lastActive = Calendar.getInstance().getTimeInMillis();
         switch(command){

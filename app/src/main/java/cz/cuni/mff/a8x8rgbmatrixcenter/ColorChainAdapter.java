@@ -194,4 +194,16 @@ public class ColorChainAdapter extends RecyclerView.Adapter<ColorChainAdapter.Co
         return timedColorChain;
     }
 
+    public int getColor(int index){
+        if(index < 0 || index >= colorChain.size()){
+            return Color.BLACK;
+        }
+
+        return colorChain.get(index);
+    }
+
+    public boolean isColorChainEmpty(){
+        return colorChain.isEmpty();
+    }
+
 }

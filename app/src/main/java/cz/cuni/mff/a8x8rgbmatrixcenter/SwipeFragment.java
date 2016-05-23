@@ -49,6 +49,11 @@ public class SwipeFragment extends Fragment implements Button.OnClickListener {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+            if(mColorChainAdapter.isColorChainEmpty()){
+                // Do nothing is the color chain is empty
+                return true;
+            }
+
             if(event.getAction() == MotionEvent.ACTION_UP){
                 for(int i = 0; i < LED_ARRAY_HEIGHT * LED_ARRAY_WIDTH; i++) {
                     if(fingerIndicator[i]) {
@@ -67,7 +72,8 @@ public class SwipeFragment extends Fragment implements Button.OnClickListener {
                         fingerIndicator[i] = true;
                         //callBluetoothService(i, Color.RED);
                         callBluetoothService();
-                        view.setColor(Color.RED);
+                        // Show to first color
+                        view.setColor(mColorChainAdapter.getColor(0));
                         view.invalidate();
                     }
                 } else if (fingerIndicator[i]){
