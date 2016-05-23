@@ -21,6 +21,8 @@ import java.util.Set;
 
 import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_COMMAND_KEY;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_DEVICE_MAC_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.BT_TIMEOUT_KEY;
+import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.REQUEST_CHANGE_TIMEOUT;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.REQUEST_CONNECT;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.BluetoothService.REQUEST_DISCONNECT;
 import static cz.cuni.mff.a8x8rgbmatrixcenter.ColorSelectionView.COLOR_KEY;
@@ -36,8 +38,8 @@ public class MatrixActivity extends AppCompatActivity {
 
     public static final String DEVICE_CONNECTION = "DEVICE_CONNECTION";
 
-    public static final String DEFAULT_DEVICE_DISCONNECT_TIMEOUT_KEY = "DISCONNECT_TIMEOUT";
-    public static final long DEFAULT_DEVICE_DISCONNECT_TIMEOUT = 30000; // TODO: provide config of this value in settings fragment (save the value on exit), limit lower and upper value
+    public static final String DEVICE_DISCONNECT_TIMEOUT_KEY = "DISCONNECT_TIMEOUT";
+    public static final long DEFAULT_DISCONNECT_TIMEOUT = 30000;
 
     public static final int REQUEST_COLOR_SELECT = 1;
     public static final int REQUEST_NEW_COLOR = 2;
@@ -47,6 +49,7 @@ public class MatrixActivity extends AppCompatActivity {
     public static final String THEME_SETTINGS_KEY = "THEME_ID";
     public static int currentTheme;
 
+    private long deviceDisconnectTimeout;
     private int drawerPosition = 0;
     private Fragment fragment;
 
@@ -109,12 +112,16 @@ public class MatrixActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        // Load saved theme
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         currentTheme = settings.getInt(THEME_SETTINGS_KEY, R.style.AppTheme);
         setTheme(currentTheme);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.matrix_activity_layout);
+
+        // Load saved disconnection timeout
+        deviceDisconnectTimeout = settings.getLong(DEVICE_DISCONNECT_TIMEOUT_KEY, DEFAULT_DISCONNECT_TIMEOUT);
 
         // Initialize drawer list
         String[] menuItems = getResources().getStringArray(R.array.menu_items);
@@ -136,7 +143,7 @@ public class MatrixActivity extends AppCompatActivity {
             // Retrieve drawer position
             drawerPosition = savedInstanceState.getInt(DRAWER_POSITION_KEY);
 
-            // Retrieve connected deviec
+            // Retrieve connected device
             String connectedDeviceMAC = savedInstanceState.getString(BluetoothService.BT_DEVICE_MAC_KEY, null);
             if(connectedDeviceMAC != null
                     && mBluetoothAdapter != null
@@ -256,12 +263,10 @@ public class MatrixActivity extends AppCompatActivity {
             sf.setActivity(this);
             fragment = sf;
         } else if(settingsFragment.equals(fragmentName)) {
-            SettingsFragment sf = (SettingsFragment) getFragmentManager().findFragmentByTag(fragmentName);
-            if(sf == null) {
-                sf = new SettingsFragment();
+            fragment = getFragmentManager().findFragmentByTag(fragmentName);
+            if(fragment == null) {
+                fragment = new SettingsFragment();
             }
-            sf.setActivity(this);
-            fragment = sf;
         } else if(aboutFragment.equals(fragmentName)) {
             fragment = getFragmentManager().findFragmentByTag(fragmentName);
             if(fragment == null) {
@@ -301,5 +306,25 @@ public class MatrixActivity extends AppCompatActivity {
 
     public BluetoothDevice getConnectedDevice(){
         return connectedDevice;
+    }
+
+    public long getDeviceDisconnectTimeout(){
+        return deviceDisconnectTimeout;
+    }
+
+    public void setDeviceDisconnectTimeout(long timeout){
+        deviceDisconnectTimeout = timeout;
+
+        Intent intent = new Intent(this, BluetoothService.class);
+        intent.putExtra(BT_COMMAND_KEY, REQUEST_CHANGE_TIMEOUT);
+        intent.putExtra(BT_TIMEOUT_KEY, timeout);
+        startService(intent);
+
+        // save timeout
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong(DEVICE_DISCONNECT_TIMEOUT_KEY, deviceDisconnectTimeout);
+        // Commit the edits!
+        editor.commit();
     }
 }

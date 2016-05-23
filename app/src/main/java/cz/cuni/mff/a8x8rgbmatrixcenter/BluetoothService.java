@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,14 +30,14 @@ public class BluetoothService extends Service {
     public static final String BT_COMMAND_KEY = "COMMAND";
     public static final String BT_DEVICE_MAC_KEY = "BT_DEVICE_MAC";
     public static final String BT_DATA_KEY = "BT_DATA";
+    public static final String BT_TIMEOUT_KEY = "BT_TIMEOUT";
 
     public static final String REQUEST_CONNECT = "connect";
     public static final String REQUEST_DISCONNECT = "disconnect";
     public static final String REQUEST_SEND = "send";
+    public static final String REQUEST_CHANGE_TIMEOUT = "timeout";
 
     private static final long SEND_FAILED_MSG_DELAY = 5000;
-
-    private long lastActive;
 
 
     public class LocalBinder extends Binder {
@@ -53,6 +54,8 @@ public class BluetoothService extends Service {
     BluetoothSocket connectedSocket;
     OutputStream connectedOut;
     private long lastToast;
+    private long lastActive;
+    private long disconnectTimeout;
 
 
     @Override
@@ -70,16 +73,20 @@ public class BluetoothService extends Service {
         lastToast = 0L;
         lastActive = Calendar.getInstance().getTimeInMillis();
 
-        Thread disconnectTimeout = new Thread(){
+        SharedPreferences settings = getSharedPreferences(MatrixActivity.PREFS_NAME, 0);
+        disconnectTimeout = settings.getLong(MatrixActivity.DEVICE_DISCONNECT_TIMEOUT_KEY, MatrixActivity.DEFAULT_DISCONNECT_TIMEOUT);
+        Log.i("BluetoothService", "disconnectTimeout " + disconnectTimeout);
+
+        Thread disconnectGuard = new Thread(){
             @Override
             public void run(){
                 while(true) {
-                    if(Calendar.getInstance().getTimeInMillis() - lastActive
-                            > MatrixActivity.DEFAULT_DEVICE_DISCONNECT_TIMEOUT){
+                    long inactivePeriod = Calendar.getInstance().getTimeInMillis() - lastActive;
+                    if(inactivePeriod >= disconnectTimeout){
                         break;
                     }
                     try {
-                        sleep(MatrixActivity.DEFAULT_DEVICE_DISCONNECT_TIMEOUT);
+                        sleep(disconnectTimeout - inactivePeriod);
                     } catch (InterruptedException e) { }
                 }
                 if(connectedDevice != null) {
@@ -89,7 +96,7 @@ public class BluetoothService extends Service {
                 Log.i("BluetoothService", "Stopped");
             }
         };
-        disconnectTimeout.start();
+        disconnectGuard.start();
     }
 
     @Override
@@ -107,6 +114,10 @@ public class BluetoothService extends Service {
             case REQUEST_SEND:
                 int[] colors = intent.getIntArrayExtra(BT_DATA_KEY);
                 send(colors);
+                break;
+            case REQUEST_CHANGE_TIMEOUT:
+                disconnectTimeout = intent.getLongExtra(BT_TIMEOUT_KEY, MatrixActivity.DEFAULT_DISCONNECT_TIMEOUT);
+                Log.i("BluetoothService", "disconnectTimeout changed " + disconnectTimeout);
                 break;
             default:
                 Log.e("BluetoothService", String.format(
