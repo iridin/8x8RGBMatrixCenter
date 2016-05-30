@@ -114,7 +114,7 @@ public class MatrixActivity extends AppCompatActivity {
 
         // Load saved theme
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        currentTheme = settings.getInt(THEME_SETTINGS_KEY, R.style.AppTheme);
+        currentTheme = settings.getInt(THEME_SETTINGS_KEY, R.style.CustomThemeDark);
         setTheme(currentTheme);
 
         super.onCreate(savedInstanceState);
